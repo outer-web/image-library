@@ -5,6 +5,17 @@
 
 This package adds ways to store and link images to your models.
 
+It provides:
+
+- A way to store images on different disks
+- An Image and ImageConversion model to interact with the images and image_conversions table
+- A way to map cropper.js data to the image_conversions table which than automatically generates and stores the conversion image on disk
+- A way to define conversions for images (e.g. thumbnail, 16:9, ...). Using spatie/image you can crop and add effects to the images.
+- Support for webp images (automatically generated and stored on disk and rendered using the picture HTML element)
+- Support for responsive images (automatically generated and stored on disk and rendered using the srcset attribute)
+- A way to render images using the picture HTML element
+- A way to render images using the image HTML element
+
 ## Installation
 
 You can install the package via composer:
@@ -253,9 +264,11 @@ You can provide a fallback conversion by using the `fallback-conversion` attribu
 <x-image :image="$image" conversion="thumbnail" fallback-conversion="original" />
 ```
 
-If you supply a fallback conversion with the `fallback` attribute, the conversion of the `image` attribute image will be used as the fallback image.
+Combining this with the `fallback` attribute, you can have different outcomes when the image and/or conversion are not available:
 
-If you supply a `fallback` attribute and no `fallback-conversion` attribute, the fallback image will be rendered using the fallback conversion.
+- Defining a `fallback` attribute and a `fallback-conversion` attribute will render the fallback image using the fallback conversion if the fallback image is an `Image` model.
+- Only defining a `fallback` attribute will render the fallback image using the fallback conversion if the fallback image is an `Image` model.
+- Only defining a `fallback-conversion` attribute will render the image using the fallback conversion.
 
 ### Linking images to models
 
