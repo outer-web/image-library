@@ -1,0 +1,42 @@
+{
+    "name": "outerweb/image-library",
+    "description": "Adds ways to store and link images to your models.",
+    "homepage": "https://github.com/outer-web/image-library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Outerweb",
+            "email": "info@outerweb.be"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^10.0",
+        "spatie/image": "^3.3",
+        "spatie/laravel-package-tools": "^1.16",
+        "spatie/laravel-translatable": "^6.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Outerweb\\ImageLibrary\\": "src/"
+        },
+        "files": [
+            "src\\Helpers\\helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Outerweb\\ImageLibrary\\ImageLibraryServiceProvider"
+            ],
+            "aliases": {
+                "ImageLibrary": "Outerweb\\ImageLibrary\\Facades\\ImageLibrary"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
