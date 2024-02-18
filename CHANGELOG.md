@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 1.2.0 - 2024-02-19
+
+### Added
+
+- Added `Outerweb\ImageLibrary\Facades\ImageLibrary::isSpatieTranslatable()` method to check the value of the config variable `spatie_translatable`.
+
 ## 1.1.0 - 2024-02-19
 
 ### Changed

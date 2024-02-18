@@ -52,4 +52,9 @@ class ImageLibrary
     {
         return $this->getConversionDefinitions()->first(fn(ConversionDefinition $definition) => $definition->name === $name);
     }
+
+    public function isSpatieTranslatable(): bool
+    {
+        return config('image-library.spatie_translatable', false);
+    }
 }
