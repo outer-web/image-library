@@ -64,8 +64,6 @@ class Image extends Component
                     return $this->src = $conversion->getUrl();
                 }
             }
-
-            return $this->src = $this->getSrcByFallback();
         }
 
         $src = $this->image?->getUrl();
