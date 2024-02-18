@@ -46,7 +46,7 @@ return [
      * Whether to use the spatie translatable
      * for title and alt attributes.
      */
-    'spatie_translatable' => true,
+    'spatie_translatable' => false,
 
     /**
      * The support options:
