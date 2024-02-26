@@ -2,35 +2,45 @@
 
 namespace Outerweb\ImageLibrary\Entities;
 
+use Outerweb\ImageLibrary\Facades\ImageLibrary;
+
 class ConversionDefinition
 {
     public function __construct(
         public string $name = '',
+        public string $labelValue = '',
         public AspectRatio|array|string|null $aspect_ratio = null,
         public ?int $default_width = null,
         public ?int $default_height = null,
         public Effects|array $effects = [],
+        public bool $doTranslateLabel = false,
     ) {
         if (!is_null($aspect_ratio)) {
             $this->aspectRatio($aspect_ratio);
         }
 
         $this->effects($effects);
+
+        $this->labelValue = $this->labelValue ?: $this->name;
     }
 
     public static function make(
         string $name = '',
+        string $label = '',
         AspectRatio|array|string|null $aspect_ratio = null,
         ?int $default_width = null,
         ?int $default_height = null,
         Effects|array $effects = [],
+        bool $doTranslateLabel = false,
     ): self {
         return new self(
             $name,
+            $label,
             $aspect_ratio,
             $default_width,
             $default_height,
             $effects,
+            $doTranslateLabel,
         );
     }
 
@@ -38,16 +48,50 @@ class ConversionDefinition
     {
         return new self(
             $data['name'] ?? null,
+            $data['label'] ?? null,
             $data['aspect_ratio'] ?? null,
             $data['default_width'] ?? null,
             $data['default_height'] ?? null,
             $data['effects'] ?? [],
+            $data['do_translate_label'] ?? false,
         );
+    }
+
+    public static function get(string $name): self
+    {
+        return ImageLibrary::getConversionDefinition($name);
+    }
+
+    public function __get(string $key): mixed
+    {
+        if ($key === 'label') {
+            if (blank($this->labelValue)) {
+                return $this->name;
+            }
+
+            return $this->doTranslateLabel ? __($this->labelValue) : $this->labelValue;
+        }
+
+        return null;
     }
 
     public function name(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function label(string $label): self
+    {
+        $this->labelValue = $label;
+
+        return $this;
+    }
+
+    public function translateLabel(bool $doTranslateLabel = true): self
+    {
+        $this->doTranslateLabel = $doTranslateLabel;
 
         return $this;
     }
@@ -121,6 +165,7 @@ class ConversionDefinition
     {
         return [
             'name' => $this->name,
+            'label' => $this->label,
             'aspect_ratio' => (string) $this->aspect_ratio,
             'default_width' => $this->default_width,
             'default_height' => $this->default_height,
