@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Outerweb\ImageLibrary\Facades\ImageLibrary;
 use Outerweb\ImageLibrary\Models\Traits\HandlesConversions;
 use Outerweb\ImageLibrary\Models\Traits\HasResponsiveVariants;
 use Outerweb\ImageLibrary\Models\Traits\HasWebpVariant;
@@ -86,6 +87,13 @@ class ImageConversion extends Model
     {
         return Attribute::make(
             get: fn() => $this->image->file_extension,
+        );
+    }
+
+    protected function definition(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => ImageLibrary::getConversionDefinition($this->conversion_name),
         );
     }
 }
