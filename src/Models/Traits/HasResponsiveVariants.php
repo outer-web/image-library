@@ -89,6 +89,12 @@ trait HasResponsiveVariants
         $this->getResponsiveVariants()->each(function ($variant) {
             Storage::disk($this->disk)->delete($variant->path);
         });
+
+        if (config('image-library.support.webp')) {
+            $this->getResponsiveVariants(true)->each(function ($variant) {
+                Storage::disk($this->disk)->delete($variant->path);
+            });
+        }
     }
 
     public function hasResponsiveVariants(): bool
