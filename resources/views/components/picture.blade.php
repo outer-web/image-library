@@ -1,3 +1,9 @@
+@php
+	$attributes = $attributes->merge([
+	    'data-image-library' => 'image',
+	]);
+@endphp
+
 <picture>
 	<source
 		srcset="{{ $srcsetWebp }}"
@@ -14,6 +20,5 @@
 		alt="{{ $alt }}"
 		width="{{ $width }}"
 		{{ $attributes }}
-		onload="if(!(width=this.getBoundingClientRect().width))return;this.onload=null;this.sizes=Math.ceil(width/window.innerWidth*100)+'vw';"
 	/>
 </picture>

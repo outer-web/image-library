@@ -27,9 +27,10 @@ class ImageLibraryServiceProvider extends PackageServiceProvider
             ])
             ->hasViews()
             ->hasViewComponents(
-                config('image-library.blade_component_prefix', ''),
+                'image-library',
                 Components\Image::class,
                 Components\Picture::class,
+                Components\Scripts::class,
             )
             ->hasInstallCommand(function (InstallCommand $command) {
                 $composerFile = file_get_contents(__DIR__ . '/../composer.json');

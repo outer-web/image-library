@@ -26,6 +26,15 @@ return [
     'blade_component_prefix' => '',
 
     /**
+     * The delay to use for the responsive sizes script
+     * that runs in the scripts blade component. This
+     * is because the responsive sizes initialization
+     * sometimes runs before the images is visible
+     * (e.g. in a modal that gets opened).
+     */
+    'blade_script_init_delay' => 300,
+
+    /**
      * The responsive variants options:
      * - min_width: The minimum width for the responsive variants.
      * - min_height: The minimum height for the responsive variants.
