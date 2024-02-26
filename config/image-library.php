@@ -21,11 +21,6 @@ return [
     'max_file_size' => '25MB',
 
     /**
-     * The prefix to use for blade components.
-     */
-    'blade_component_prefix' => '',
-
-    /**
      * The delay to use for the responsive sizes script
      * that runs in the scripts blade component. This
      * is because the responsive sizes initialization

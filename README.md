@@ -42,6 +42,14 @@ Run the migrations:
 php artisan migrate
 ```
 
+Add the `<x-image-library::scripts />` blade component to your layout (at the bottom of the body tag).
+
+```blade
+<x-image-library::scripts />
+```
+
+This will add a script tag to the bottom of the body tag that will dynamically set the image width as the sizes attribute of the image tag. This is an automatic way of letting the browser know which responsive image variant to download based on the device's screen size, resolution, density and supported image formats.
+
 ## Configuration
 
 You can configure the package by editing the `config/image-library.php` file.
@@ -64,6 +72,8 @@ use OuterWeb\ImageLibrary\Entities\Effects;
 ImageLibrary::addConversionDefinition(
     ConversionDefinition::make()
         ->name('thumbnail')
+        ->label('Thumbnail')
+        ->translateLabel()
         ->aspectRatio(
             AspectRatio::make()
                 ->x(1)
@@ -85,6 +95,36 @@ ImageLibrary::addConversionDefinition(
 #### Name (required)
 
 The name of the conversion. This is the name you will use to refer to the conversion.
+
+```php
+use OuterWeb\ImageLibrary\Entities\ConversionDefinition;
+
+ConversionDefinition::make()
+    ->name('thumbnail');
+```
+
+#### Label (optional)
+
+The label of the conversion. This is can be used by other packages that depend on this package to show the label in the user interface. E.g. in our Filament Image Library package, this is used to display the conversion name above the cropper.
+
+```php
+use OuterWeb\ImageLibrary\Entities\ConversionDefinition;
+
+ConversionDefinition::make()
+    ->label('Thumbnail');
+```
+
+#### Translate label (optional)
+
+Whether the label should be translated. By default, the label will not be translated. This method will take the value of the label and put it through the `__()` function.
+
+```php
+use OuterWeb\ImageLibrary\Entities\ConversionDefinition;
+
+ConversionDefinition::make()
+    ->label('conversions.labels.thumbnail');
+    ->translateLabel();
+```
 
 #### Aspect ratio (required)
 
@@ -228,18 +268,18 @@ When an image is uploaded, these things will happen:
 
 ### Rendering images
 
-You can render images by using the `<x-image />` blade component.
+You can render images by using the `<x-image-library::image />` blade component.
 
 ```blade
-<x-image :image="$image" conversion="thumbnail" />
+<x-image-library::image :image="$image" conversion="thumbnail" />
 ```
 
 This will render a responsive image with the `thumbnail` conversion.
 
-You can also render a `<x-picture />` blade component.
+You can also render a `<x-image-library::picture />` blade component.
 
 ```blade
-<x-picture :image="$image" conversion="thumbnail" />
+<x-image-library::picture :image="$image" conversion="thumbnail" />
 ```
 
 This gives the browser the ability to choose the best image to download based on the device's screen size, resolution, density and supported image formats.
@@ -249,7 +289,7 @@ This gives the browser the ability to choose the best image to download based on
 You can provide a fallback image by using the `fallback` attribute.
 
 ```blade
-<x-image :image="$image" conversion="thumbnail" fallback="fallback-image.jpg" />
+<x-image-library::image :image="$image" conversion="thumbnail" fallback="fallback-image.jpg" />
 ```
 
 This can be a string or another `Image` model.
@@ -261,7 +301,7 @@ The fallback image will be rendered using the conversion defined in the `convers
 You can provide a fallback conversion by using the `fallback-conversion` attribute.
 
 ```blade
-<x-image :image="$image" conversion="thumbnail" fallback-conversion="original" />
+<x-image-library::image :image="$image" conversion="thumbnail" fallback-conversion="original" />
 ```
 
 Combining this with the `fallback` attribute, you can have different outcomes when the image and/or conversion are not available:
@@ -324,6 +364,10 @@ It saves the following data in the database:
 - `scale_y` : The y scale of the image
 - `created_at` : The creation date
 - `updated_at` : The last update date
+
+## Upgrading
+
+Please see [UPGRADING](UPGRADING.md) for information on upgrading to a new major version.
 
 ## Changelog
 

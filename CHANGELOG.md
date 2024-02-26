@@ -2,6 +2,21 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.0.0 - 2024-02-26
+
+### Added
+
+- Added `Outerweb\ImageLibrary\Entities\ConversionDefinition::label(string $label)` method to set the label of the conversion. By default, the label will be the name of the conversion.
+- Added `Outerweb\ImageLibrary\Entities\ConversionDefinition::translateLabel(bool $doTranslateLabel = true)` method to set whether the label should be translated. By default, the label will not be translated. This method will take the value of the label and put it through the `__()` function.
+
+### Changed
+
+- Changed the javascript code that dynamically sets the image width as the sizes attribute of the image tag. The new code takes into account any rerendering in the browser through a MutationObserver. So when livewire or any javascript library rerenders (a part of) the page, the image width will be recalculated and set as the sizes attribute of the image tag.
+
+### Fixed
+
+- Fixed a bug where the webp variants of the responsive variants did not get deleted when the conversions get regenerated.
+
 ## 1.2.0 - 2024-02-19
 
 ### Added
