@@ -79,6 +79,10 @@ class Image extends Component
     {
         $image = $this->imageConversion ?? $this->image;
 
+        if (is_null($image)) {
+            return null;
+        }
+
         $responsiveVariants = $image->getResponsiveVariants();
 
         if ($responsiveVariants->isEmpty()) {
@@ -106,7 +110,7 @@ class Image extends Component
             return $this->imageConversion;
         }
 
-        return $this->imageConversion = $this->image->getConversion($this->conversion);
+        return $this->imageConversion = $this->image?->getConversion($this->conversion);
     }
 
     public function getFallbackConversion(): ?ImageConversion
@@ -115,7 +119,7 @@ class Image extends Component
             return $this->fallbackImageConversion;
         }
 
-        return $this->fallbackImageConversion = $this->image->getConversion($this->fallbackConversion);
+        return $this->fallbackImageConversion = $this->image?->getConversion($this->fallbackConversion);
     }
 
     public function getSrcByFallback(): ?string

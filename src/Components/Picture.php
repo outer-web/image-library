@@ -12,9 +12,13 @@ class Picture extends Image
         return view('image-library::components.picture');
     }
 
-    public function srcsetWebp(): string
+    public function srcsetWebp(): ?string
     {
         $image = $this->imageConversion ?? $this->image;
+
+        if (is_null($image)) {
+            return null;
+        }
 
         $responsiveVariants = $image->getResponsiveVariants(true);
 

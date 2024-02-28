@@ -5,14 +5,18 @@
 @endphp
 
 <picture>
-	<source
-		srcset="{{ $srcsetWebp }}"
-		type="image/webp"
-	/>
-	<source
-		srcset="{{ $srcset }}"
-		type="{{ $image->mime_type }}"
-	/>
+	@if ($srcsetWebp)
+		<source
+			srcset="{{ $srcsetWebp }}"
+			type="image/webp"
+		/>
+	@endif
+	@if ($srcset && $image)
+		<source
+			srcset="{{ $srcset }}"
+			type="{{ $image->mime_type }}"
+		/>
+	@endif
 	<img
 		src="{{ $src }}"
 		sizes="1px"
