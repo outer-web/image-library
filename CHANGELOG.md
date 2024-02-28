@@ -2,6 +2,13 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.1.0 - 2024-03-28
+
+### Fixed
+
+- Fixed a bug where the javascript code that dynamically sets the image width as the sizes attribute of the image tag caused an infinite loop because the `load` event listener kept firing.
+- Fixed several issues with the rendering of the image and picture tags when the image was set to `NULL`.
+
 ## 2.0.0 - 2024-02-26
 
 ### Added
