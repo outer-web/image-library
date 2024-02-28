@@ -42,10 +42,10 @@ Run the migrations:
 php artisan migrate
 ```
 
-Add the `<x-image-library::scripts />` blade component to your layout (at the bottom of the body tag).
+Add the `<x-image-library-scripts />` blade component to your layout (at the bottom of the body tag).
 
 ```blade
-<x-image-library::scripts />
+<x-image-library-scripts />
 ```
 
 This will add a script tag to the bottom of the body tag that will dynamically set the image width as the sizes attribute of the image tag. This is an automatic way of letting the browser know which responsive image variant to download based on the device's screen size, resolution, density and supported image formats.
@@ -268,18 +268,18 @@ When an image is uploaded, these things will happen:
 
 ### Rendering images
 
-You can render images by using the `<x-image-library::image />` blade component.
+You can render images by using the `<x-image-library-image />` blade component.
 
 ```blade
-<x-image-library::image :image="$image" conversion="thumbnail" />
+<x-image-library-image :image="$image" conversion="thumbnail" />
 ```
 
 This will render a responsive image with the `thumbnail` conversion.
 
-You can also render a `<x-image-library::picture />` blade component.
+You can also render a `<x-image-library-picture />` blade component.
 
 ```blade
-<x-image-library::picture :image="$image" conversion="thumbnail" />
+<x-image-library-picture :image="$image" conversion="thumbnail" />
 ```
 
 This gives the browser the ability to choose the best image to download based on the device's screen size, resolution, density and supported image formats.
@@ -289,7 +289,7 @@ This gives the browser the ability to choose the best image to download based on
 You can provide a fallback image by using the `fallback` attribute.
 
 ```blade
-<x-image-library::image :image="$image" conversion="thumbnail" fallback="fallback-image.jpg" />
+<x-image-library-image :image="$image" conversion="thumbnail" fallback="fallback-image.jpg" />
 ```
 
 This can be a string or another `Image` model.
@@ -301,7 +301,7 @@ The fallback image will be rendered using the conversion defined in the `convers
 You can provide a fallback conversion by using the `fallback-conversion` attribute.
 
 ```blade
-<x-image-library::image :image="$image" conversion="thumbnail" fallback-conversion="original" />
+<x-image-library-image :image="$image" conversion="thumbnail" fallback-conversion="original" />
 ```
 
 Combining this with the `fallback` attribute, you can have different outcomes when the image and/or conversion are not available:
