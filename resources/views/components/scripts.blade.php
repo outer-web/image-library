@@ -26,11 +26,17 @@
 			};
 
 			window.imageLibraryImages.forEach((image) => {
-				image.addEventListener('load', () => setSizesAttribute(image), {
-					signal: window.imageLibraryAbortController.signal
+				image.addEventListener('load', function() {
+					setSizesAttribute(image);
+				}, {
+					signal: window.imageLibraryAbortController.signal,
+					once: true
 				});
-				window.addEventListener('resize', debounce(() => setSizesAttribute(image),
-					100), {
+				window.addEventListener('resize', function() {
+					debounce(() => setSizesAttribute(
+							image),
+						100);
+				}, {
 					signal: window.imageLibraryAbortController.signal
 				});
 				setSizesAttribute(image);
