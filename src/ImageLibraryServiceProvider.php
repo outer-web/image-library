@@ -33,6 +33,11 @@ class ImageLibraryServiceProvider extends PackageServiceProvider
                 Components\Scripts::class,
             )
             ->hasInstallCommand(function (InstallCommand $command) {
+                $command
+                    ->publishConfigFile()
+                    ->publishMigrations()
+                    ->askToRunMigrations();
+
                 $composerFile = file_get_contents(__DIR__ . '/../composer.json');
 
                 if ($composerFile) {

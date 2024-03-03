@@ -24,22 +24,10 @@ You can install the package via composer:
 composer require outerweb/image-library
 ```
 
-Publish the migration files:
+Run the install command:
 
 ```bash
-php artisan vendor:publish --provider="OuterWeb\ImageLibrary\ImageLibraryServiceProvider" --tag="image-library-migrations"
-```
-
-Publish the config file:
-
-```bash
-php artisan vendor:publish --provider="OuterWeb\ImageLibrary\ImageLibraryServiceProvider" --tag="image-library-config"
-```
-
-Run the migrations:
-
-```bash
-php artisan migrate
+php artisan image-library:install
 ```
 
 Add the `<x-image-library-scripts />` blade component to your layout (at the bottom of the body tag).

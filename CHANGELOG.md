@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.2.1 - 2024-03-04
+
+### Changed
+
+- Improved the installation process by utilizing more of the Spatie package install command.
+
 ## 2.1.0 - 2024-03-28
 
 ### Fixed
