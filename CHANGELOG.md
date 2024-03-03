@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.3.0 - 2024-03-04
+
+### Added
+
+- Added a `createSync` method to the `ConversionDefinition` entity to inform the image library to dispatch the generateConversion job synchronously. This is done to make the thumbnail generation conversion visible immediately after uploading an image when using a async queue driver.
+
 ## 2.2.1 - 2024-03-04
 
 ### Changed

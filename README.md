@@ -77,6 +77,7 @@ ImageLibrary::addConversionDefinition(
                 ->sepia()
                 ->sharpen(10)
         )
+        ->createSync()
 );
 ```
 
@@ -193,6 +194,17 @@ ConversionDefinition::make()
         'sepia' => true,
         'sharpen' => 10
     ]);
+```
+
+#### Create sync (optional)
+
+You can inform the image library to dispatch the generateConversion job synchronously. This is done to make the thumbnail generation conversion visible immediately after uploading an image when using a async queue driver.
+
+```php
+use OuterWeb\ImageLibrary\Entities\ConversionDefinition;
+
+ConversionDefinition::make()
+    ->createSync();
 ```
 
 ### Uploading images

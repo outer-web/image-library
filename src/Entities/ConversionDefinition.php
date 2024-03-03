@@ -13,7 +13,8 @@ class ConversionDefinition
         public ?int $default_width = null,
         public ?int $default_height = null,
         public Effects|array $effects = [],
-        public bool $doTranslateLabel = false,
+        public bool $do_translate_label = false,
+        public bool $create_sync = false,
     ) {
         if (!is_null($aspect_ratio)) {
             $this->aspectRatio($aspect_ratio);
@@ -32,6 +33,7 @@ class ConversionDefinition
         ?int $default_height = null,
         Effects|array $effects = [],
         bool $doTranslateLabel = false,
+        bool $createSync = false,
     ): self {
         return new self(
             $name,
@@ -41,6 +43,7 @@ class ConversionDefinition
             $default_height,
             $effects,
             $doTranslateLabel,
+            $createSync,
         );
     }
 
@@ -54,6 +57,7 @@ class ConversionDefinition
             $data['default_height'] ?? null,
             $data['effects'] ?? [],
             $data['do_translate_label'] ?? false,
+            $data['create_sync'] ?? false,
         );
     }
 
@@ -69,7 +73,7 @@ class ConversionDefinition
                 return $this->name;
             }
 
-            return $this->doTranslateLabel ? __($this->labelValue) : $this->labelValue;
+            return $this->do_translate_label ? __($this->labelValue) : $this->labelValue;
         }
 
         return null;
@@ -91,7 +95,7 @@ class ConversionDefinition
 
     public function translateLabel(bool $doTranslateLabel = true): self
     {
-        $this->doTranslateLabel = $doTranslateLabel;
+        $this->do_translate_label = $doTranslateLabel;
 
         return $this;
     }
@@ -132,6 +136,13 @@ class ConversionDefinition
         }
 
         $this->effects = $effects;
+
+        return $this;
+    }
+
+    public function createSync(bool $createSync = true): self
+    {
+        $this->create_sync = $createSync;
 
         return $this;
     }
