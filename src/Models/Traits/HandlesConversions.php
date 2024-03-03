@@ -23,12 +23,24 @@ trait HandlesConversions
         });
 
         self::created(function (ImageConversion $conversion) {
-            GenerateConversion::dispatch($conversion);
+            $conversionDefinition = ImageLibrary::getConversionDefinition($conversion->conversion_name);
+
+            if ($conversionDefinition->create_sync) {
+                GenerateConversion::dispatchSync($conversion);
+            } else {
+                GenerateConversion::dispatch($conversion);
+            }
         });
 
         self::updated(function (ImageConversion $conversion) {
             if ($conversion->wasChanged(['x', 'y', 'width', 'height', 'rotate', 'scale_x', 'scale_y', 'conversion_name'])) {
-                GenerateConversion::dispatch($conversion, true);
+                $conversionDefinition = ImageLibrary::getConversionDefinition($conversion->conversion_name);
+
+                if ($conversionDefinition->create_sync) {
+                    GenerateConversion::dispatchSync($conversion);
+                } else {
+                    GenerateConversion::dispatch($conversion);
+                }
             }
         });
     }
