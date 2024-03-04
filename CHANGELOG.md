@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.4.0 - 2024-03-04
+
+### Added
+
+- Added a `intersectionObserver` to the scripts blade component to be better at dynamically setting the image sizes attribute of the image tag. This is done to fix issues where the image is hidden and becomes visible after a user action. (e.g. a hidden tab that becomes visible after a user clicks on it.)
+
 ## 2.3.0 - 2024-03-04
 
 ### Added

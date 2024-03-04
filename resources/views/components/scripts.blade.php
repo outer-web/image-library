@@ -32,6 +32,7 @@
 					signal: window.imageLibraryAbortController.signal,
 					once: true
 				});
+
 				window.addEventListener('resize', function() {
 					debounce(() => setSizesAttribute(
 							image),
@@ -39,6 +40,27 @@
 				}, {
 					signal: window.imageLibraryAbortController.signal
 				});
+
+				if (window.imageLibraryIntersectionObserver) {
+					try {
+						window.imageLibraryIntersectionObserver.unobserve(image);
+					} catch (e) {
+						// Image wasn't being observed
+					}
+				}
+
+				window.imageLibraryIntersectionObserver = window.imageLibraryIntersectionObserver ||
+					new IntersectionObserver((entries, observer) => {
+						entries.forEach(entry => {
+							if (!entry.isIntersecting) return;
+							setSizesAttribute(entry.target);
+						});
+					}, {
+						signal: window.imageLibraryAbortController.signal,
+					});
+
+				window.imageLibraryIntersectionObserver.observe(image);
+
 				setSizesAttribute(image);
 			});
 		};
