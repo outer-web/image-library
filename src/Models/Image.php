@@ -38,7 +38,7 @@ class Image extends Model
         'alt' => 'json',
     ];
 
-    public function getTranslatableAttributes(): array
+    public function getTranslatableAttributes() : array
     {
         if (config('image-library.spatie_translatable')) {
             return ['title', 'alt'];
@@ -47,8 +47,14 @@ class Image extends Model
         return [];
     }
 
-    public function getShortPath(bool $includeFileExtension = true): string
+    public function getShortPath(bool $includeFileExtension = true) : ?string
     {
+        $basePath = $this->getBasePath();
+
+        if (is_null($basePath)) {
+            return null;
+        }
+
         $path = $this->getBasePath() . '/' . $this->file_name;
 
         if ($includeFileExtension) {
@@ -58,30 +64,42 @@ class Image extends Model
         return $path;
     }
 
-    public function getBasePath(): string
+    public function getBasePath() : ?string
     {
         return $this->uuid;
     }
 
-    public function createBasePath(): void
+    public function createBasePath() : void
     {
         Storage::disk($this->disk)->makeDirectory($this->getBasePath());
     }
 
-    public function getPath(): string
+    public function getPath() : string
     {
+        $path = $this->getShortPath();
+
+        if (is_null($path)) {
+            return '';
+        }
+
         return Storage::disk($this->disk)->path($this->getShortPath());
     }
 
-    public function getUrl(): string
+    public function getUrl() : string
     {
+        $path = $this->getShortPath();
+
+        if (is_null($path)) {
+            return '';
+        }
+
         return Storage::disk($this->disk)->url($this->getShortPath());
     }
 
-    protected function fileName(): Attribute
+    protected function fileName() : Attribute
     {
         return Attribute::make(
-            get: fn() => 'original',
+            get: fn () => 'original',
         );
     }
 }

@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.4.1 - 2024-03-09
+
+### Fixed
+
+- Fixed an issue where `getbasePath` method could return null instead of a string and break the `url` and `path` methods of the Image model.
+
 ## 2.4.0 - 2024-03-04
 
 ### Added
