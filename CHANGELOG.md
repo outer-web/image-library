@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.4.2 - 2024-03-12
+
+### Added
+
+- Added support for Laravel 11.
+
 ## 2.4.1 - 2024-03-09
 
 ### Fixed
