@@ -16,7 +16,7 @@ use Spatie\Image\Image as SpatieImage;
 
 trait HandlesConversions
 {
-    public static function bootHandlesConversions(): void
+    public static function bootHandlesConversions() : void
     {
         self::deleting(function (ImageConversion $conversion) {
             $conversion->deleteFiles();
@@ -26,9 +26,9 @@ trait HandlesConversions
             $conversionDefinition = ImageLibrary::getConversionDefinition($conversion->conversion_name);
 
             if ($conversionDefinition->create_sync) {
-                GenerateConversion::dispatchSync($conversion);
+                GenerateConversion::dispatchSync($conversion, true);
             } else {
-                GenerateConversion::dispatch($conversion);
+                GenerateConversion::dispatch($conversion, true);
             }
         });
 
@@ -37,16 +37,16 @@ trait HandlesConversions
                 $conversionDefinition = ImageLibrary::getConversionDefinition($conversion->conversion_name);
 
                 if ($conversionDefinition->create_sync) {
-                    GenerateConversion::dispatchSync($conversion);
+                    GenerateConversion::dispatchSync($conversion, true);
                 } else {
-                    GenerateConversion::dispatch($conversion);
+                    GenerateConversion::dispatch($conversion, true);
                 }
             }
         });
     }
-    public function generate(bool $force = false): void
+    public function generate(bool $force = false) : void
     {
-        if ($this->exists() && !$force) {
+        if ($this->exists() && ! $force) {
             return;
         }
 
@@ -88,7 +88,7 @@ trait HandlesConversions
 
         $effects = $conversionData->effects;
 
-        if (!is_null($effects->blur)) {
+        if (! is_null($effects->blur)) {
             $conversionFile->blur($effects->blur);
         }
 
@@ -125,7 +125,7 @@ trait HandlesConversions
         }
     }
 
-    public function deleteFiles(): void
+    public function deleteFiles() : void
     {
         foreach (Storage::disk($this->image->disk)->allFiles($this->getBasePath()) as $file) {
             if (preg_match('/\/' . $this->file_name . '(_|\.)?/', $file)) {

@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.5.0 - 2024-03-27
+
+### Fixed
+
+- Added the $force = true on the ImageConversion observers to force the generation of the conversions. This is intended as the existing conversions should be overridden by the new ones.
+
 ## 2.4.2 - 2024-03-12
 
 ### Added
