@@ -53,7 +53,7 @@ trait HandlesConversions
         $conversionFile = SpatieImage::useImageDriver(config('image-library.image_driver'))
             ->loadFile($this->image->getPath());
 
-        if ($this->x || $this->y) {
+        if (isset($this->x) || isset($this->y)) {
             $conversionFile
                 ->manualCrop($this->width, $this->height, $this->x, $this->y);
         } else {
