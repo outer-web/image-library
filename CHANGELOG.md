@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.6.0 - 2025-01-31
+
+### Fixed
+
+- Use with('conversions') to eager load the conversions in the Image model.
+
 ## 2.5.0 - 2024-03-27
 
 ### Fixed
