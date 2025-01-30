@@ -16,9 +16,13 @@ class GenerateResponsiveVariants extends Command
         $force = $this->option('force');
 
         if (count($ids) > 0) {
-            $images = $this->getImageClass()::whereIn('id', $ids)->get();
+            $images = $this->getImageClass()::whereIn('id', $ids)
+                ->with('conversions')
+                ->get();
         } else {
-            $images = $this->getImageClass()::get();
+            $images = $this->getImageClass()::query()
+                ->with('conversions')
+                ->get();
         }
 
         $progressBar = $this->output->createProgressBar(count($images));
