@@ -40,7 +40,9 @@ trait HasResponsiveVariants
             return;
         }
 
-        $image->width($newWidth)->height($newHeight);
+        $image->width($newWidth)
+            ->height($newHeight)
+            ->background('rgba(255, 255, 255, 0)');
 
         $pathInfo = pathinfo($this->getPath());
         $variantFileName = $pathInfo['filename'] . "_{$newWidth}x{$newHeight}.{$pathInfo['extension']}";

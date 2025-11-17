@@ -45,6 +45,7 @@ trait HandlesUploads
 
             SpatieImage::useImageDriver(config('image-library.image_driver'))
                 ->loadFile($file->getPathname())
+                ->background('rgba(255, 255, 255, 0)')
                 ->optimize()
                 ->save($image->getPath());
 

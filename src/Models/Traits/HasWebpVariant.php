@@ -15,6 +15,7 @@ trait HasWebpVariant
 
         SpatieImage::useImageDriver(config('image-library.image_driver'))
             ->loadFile($this->getPath())
+            ->background('rgba(255, 255, 255, 0)')
             ->optimize()
             ->save(Storage::disk($this->disk)->path($this->getWebpShortPath()));
     }

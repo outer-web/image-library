@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 2.7.1 - 2025-11-17
+
+### Fixed
+
+- Fixed an issue where transparent images would get a black background when uploaded.
+
 ## 2.7.0 - 2025-02-27
 
 ### Added

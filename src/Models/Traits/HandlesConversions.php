@@ -109,6 +109,7 @@ trait HandlesConversions
         }
 
         $conversionFile
+            ->background('rgba(255, 255, 255, 0)')
             ->optimize()
             ->save($this->getPath());
 
