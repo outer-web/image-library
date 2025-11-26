@@ -36,7 +36,9 @@ test('each breakpoint has a minimum width', function (Breakpoint $breakpoint) {
     ->with('breakpoints');
 
 test('each breakpoint has a maximum width except the last one', function (Breakpoint $breakpoint) {
-    if ($breakpoint === array_last(Breakpoint::sortedCases())) {
+    $breakpoints = Breakpoint::sortedCases();
+
+    if ($breakpoint === $breakpoints[array_key_last($breakpoints)]) {
         expect($breakpoint->getMaxWidth())
             ->toBeNull();
     } else {

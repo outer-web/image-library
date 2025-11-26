@@ -49,7 +49,7 @@ class ImageLibrary
     }
 
     /**
-     * @param  array<ImageContext>  $imageContexts
+     * @param  array<mixed>  $imageContexts
      */
     public function registerImageContexts(array $imageContexts): void
     {

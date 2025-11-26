@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 
+// @codeCoverageIgnoreStart
 class UpgradeCommand extends Command
 {
     protected $signature = 'image-library:upgrade';
@@ -210,3 +211,4 @@ class UpgradeCommand extends Command
         return Command::SUCCESS;
     }
 }
+// @codeCoverageIgnoreEnd

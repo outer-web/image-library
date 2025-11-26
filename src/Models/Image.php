@@ -316,7 +316,7 @@ class Image extends Model implements Sortable
     }
 
     /**
-     * @param  array<string, array{width: int, height: int, x: int|null, y: int|null}>|null|CropData  $cropData
+     * @param  array<string, mixed>|null|CropData  $cropData
      * @return array<string, CropData|null>
      */
     private function generateCropData(array|CropData|null $cropData): array
@@ -333,13 +333,11 @@ class Image extends Model implements Sortable
             ->mapWithKeys(function (BackedEnum $case) use ($cropData): array {
                 $data = $cropData[$case->value] ?? null;
 
-                if ($data instanceof CropData) {
-                    return [$case->value => $data];
-                }
-
                 if (
                     is_null($data)
-                    || (! isset($data['width'], $data['height']))
+                    || ! is_array($data)
+                    || ! array_key_exists('width', $data)
+                    || ! array_key_exists('height', $data)
                 ) {
                     return [$case->value => null];
                 }

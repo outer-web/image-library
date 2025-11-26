@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Outerweb\ImageLibrary\Components;
 
+use Closure;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 use Outerweb\ImageLibrary\Contracts\ConfiguresBreakpoints;
@@ -16,7 +17,7 @@ class Image extends Component
         public ImageModel $image,
     ) {}
 
-    public function render(): View
+    public function render(): View|Closure|string
     {
         return view('image-library::components.image', [
             'sources' => collect(ImageLibrary::getBreakpointEnum()::sortedCases())
@@ -44,7 +45,7 @@ class Image extends Component
     {
         $conditions = [];
 
-        if (! is_null($breakpoint->getMinWidth()) && array_search($breakpoint, ImageLibrary::getBreakpointEnum()::sortedCases()) !== 0) {
+        if (array_search($breakpoint, ImageLibrary::getBreakpointEnum()::sortedCases()) !== 0) {
             $conditions[] = '(min-width: '.$breakpoint->getMinWidth().'px)';
         }
 

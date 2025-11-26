@@ -21,7 +21,7 @@ class ImageFactory extends Factory
         return [
             'source_image_id' => ImageLibrary::getSourceImageModel()::factory(),
             'disk' => function (array $attributes) {
-                return ImageLibrary::getSourceImageModel()::find($attributes['source_image_id'])?->disk ?? ImageLibrary::getDefaultDisk();
+                return ImageLibrary::getSourceImageModel()::find($attributes['source_image_id'])->disk ?? ImageLibrary::getDefaultDisk();
             },
             'context' => fake()->randomElement(ImageLibrary::getImageContexts()),
             'crop_data' => function (array $attributes): array {

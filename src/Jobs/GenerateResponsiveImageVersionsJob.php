@@ -86,7 +86,7 @@ class GenerateResponsiveImageVersionsJob implements ShouldQueue
 
         $breakpointMinWidth = $this->breakpoint->getMinWidth();
 
-        $minWidth = min(is_null($contextMaxWidth) ? ($breakpointMinWidth ?? 0) : ($contextMinWidth ?? 0), ImageLibrary::getResponsiveImageMinWidth());
+        $minWidth = min(is_null($contextMaxWidth) ? $breakpointMinWidth : ($contextMinWidth ?? 0), ImageLibrary::getResponsiveImageMinWidth());
 
         $ratio = $fileHeight / $fileWidth;
         $area = $fileWidth * $fileHeight;

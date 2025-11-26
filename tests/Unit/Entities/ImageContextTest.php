@@ -64,6 +64,13 @@ describe('label', function () {
         expect($imageContext->getLabel())
             ->toBe('Thumbnail Image from Closure');
     });
+
+    it('falls back to a generated label from the key when no label is set', function () {
+        $imageContext = ImageContext::make('user_profile_image');
+
+        expect($imageContext->getLabel())
+            ->toBe('User Profile Image');
+    });
 });
 
 describe('aspect ratio', function () {
