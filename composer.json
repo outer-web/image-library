@@ -1,0 +1,82 @@
+{
+    "name": "outerweb/image-library",
+    "description": "Store and link files to your models",
+    "keywords": [
+        "Outerweb",
+        "laravel",
+        "image-library"
+    ],
+    "homepage": "https://github.com/outer-web/image-library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Outerweb",
+            "email": "info@outerweb.be",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "illuminate/contracts": "^11.0||^12.0",
+        "illuminate/database": "^11.0||^12.0",
+        "illuminate/support": "^11.0||^12.0",
+        "nesbot/carbon": "^3.10",
+        "outerweb/enum-helpers": "*",
+        "spatie/eloquent-sortable": "^4.5",
+        "spatie/image": "^3.8",
+        "spatie/laravel-package-tools": "^1.16",
+        "spatie/laravel-translatable": "^6.11",
+        "spatie/temporary-directory": "^2.3"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.14",
+        "nunomaduro/collision": "^8.8",
+        "larastan/larastan": "^3.0",
+        "orchestra/testbench": "^10.0.0||^9.0.0",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-arch": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Outerweb\\ImageLibrary\\": "src/",
+            "Outerweb\\ImageLibrary\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Outerweb\\ImageLibrary\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@composer run prepare",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Outerweb\\ImageLibrary\\ImageLibraryServiceProvider"
+            ],
+            "aliases": {
+                "ImageLibrary": "Outerweb\\ImageLibrary\\Facades\\ImageLibrary"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

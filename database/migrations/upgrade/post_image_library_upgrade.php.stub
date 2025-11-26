@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Outerweb\ImageLibrary\Facades\ImageLibrary;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        foreach (DB::table('tmp_images')->cursor() as $oldRecord) {
+            $path = "{$oldRecord->uuid}/original.{$oldRecord->file_extension}";
+
+            $tmpFile = sys_get_temp_dir().'/'.basename($path);
+
+            $file = Storage::disk($oldRecord->disk)->get($path);
+
+            file_put_contents($tmpFile, $file);
+
+            $file = new UploadedFile($tmpFile, basename($path));
+
+            ImageLibrary::upload($file, [
+                'uuid' => $oldRecord->uuid,
+            ]);
+        }
+    }
+
+    public function down()
+    {
+        //
+    }
+};

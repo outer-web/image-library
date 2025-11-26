@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Providers;
+
+use Outerweb\ImageLibrary\Entities\AspectRatio;
+use Outerweb\ImageLibrary\Entities\ImageContext;
+use Outerweb\ImageLibrary\Providers\ImageLibraryServiceProvider as BaseServiceProvider;
+use Override;
+
+class ImageLibraryServiceProvider extends BaseServiceProvider
+{
+    #[Override]
+    public function imageContexts(): array
+    {
+        return [
+            ImageContext::make('thumbnail')
+                ->label(fn (): string => __('Thumbnail'))
+                ->aspectRatio(AspectRatio::make(1, 1)),
+        ];
+    }
+}

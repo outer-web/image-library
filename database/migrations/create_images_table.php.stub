@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('images', function (Blueprint $table) {
+            $table->id();
+            $table->uuid()
+                ->unique()
+                ->index();
+            $table->morphs('model');
+            $table->foreignId('source_image_id')
+                ->constrained()
+                ->cascadeOnDelete();
+            $table->string('context');
+            $table->string('context_configuration_hash');
+            $table->unsignedInteger('sort_order');
+            $table->string('disk');
+            $table->json('crop_data')
+                ->nullable();
+            $table->json('alt_text')
+                ->nullable();
+            $table->json('custom_properties')
+                ->nullable();
+            $table->timestamps();
+
+            $table->index(['context', 'context_configuration_hash']);
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('images');
+    }
+};
