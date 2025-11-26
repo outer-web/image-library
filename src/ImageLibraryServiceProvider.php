@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Outerweb\ImageLibrary;
 
-use \Outerweb\ImageLibrary\Components;
-use Outerweb\ImageLibrary\Console\Commands;
-use Outerweb\ImageLibrary\Services\ImageLibrary;
+use Outerweb\ImageLibrary\Commands\UpgradeCommand;
+use Outerweb\ImageLibrary\Components\Image;
+use Outerweb\ImageLibrary\Components\Scripts;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -16,47 +18,27 @@ class ImageLibraryServiceProvider extends PackageServiceProvider
         $package
             ->name('image-library')
             ->hasConfigFile()
-            ->hasMigrations([
-                'create_images_table',
-                'create_image_conversions_table',
-            ])
             ->hasCommands([
-                Commands\CreateOrUpdateConversions::class,
-                Commands\GenerateConversions::class,
-                Commands\GenerateResponsiveVariants::class,
+                UpgradeCommand::class,
             ])
+            ->hasMigrations([
+                'create_source_images_table',
+                'create_images_table',
+            ])
+            ->publishesServiceProvider('ImageLibraryServiceProvider')
             ->hasViews()
             ->hasViewComponents(
                 'image-library',
-                Components\Image::class,
-                Components\Picture::class,
-                Components\Scripts::class,
+                Image::class,
+                Scripts::class,
             )
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
+                    ->copyAndRegisterServiceProviderInApp()
                     ->publishMigrations()
-                    ->askToRunMigrations();
-
-                $composerFile = file_get_contents(__DIR__ . '/../composer.json');
-
-                if ($composerFile) {
-                    $githubRepo = json_decode($composerFile, true)['homepage'] ?? null;
-
-                    if ($githubRepo) {
-                        $command
-                            ->askToStarRepoOnGitHub($githubRepo);
-                    }
-                }
+                    ->askToRunMigrations()
+                    ->askToStarRepoOnGitHub('outer-web/image-library');
             });
-    }
-
-    public function register()
-    {
-        parent::register();
-
-        $this->app->singleton(ImageLibrary::class, function () {
-            return new ImageLibrary();
-        });
     }
 }

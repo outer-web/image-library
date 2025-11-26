@@ -1,73 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Outerweb\ImageLibrary\Entities;
 
 class AspectRatio
 {
-    public function __construct(
-        public ?int $x,
-        public ?int $y,
-    ) {
-    }
+    public int $horizontal;
 
-    public static function make(?int $x, ?int $y): self
+    public int $vertical;
+
+    public function __construct(int $horizontal, int $vertical)
     {
-        return new self($x, $y);
-    }
-
-    public static function fromArray(array $array): self
-    {
-        return new self($array['x'] ?? null, $array['y'] ?? null);
-    }
-
-    public static function fromString(string $string): self
-    {
-        $parts = explode(':', $string);
-
-        return new self((int) $parts[0] ?? null, (int) $parts[1] ?? null);
-    }
-
-    public function setX(int $x): self
-    {
-        $this->x = $x;
-
-        return $this;
-    }
-
-    public function setY(int $y): self
-    {
-        $this->y = $y;
-
-        return $this;
+        $this->horizontal = $horizontal;
+        $this->vertical = $vertical;
     }
 
     public function __toString(): string
     {
-        return "{$this->x}:{$this->y}";
+        return "{$this->horizontal}:{$this->vertical}";
     }
 
-    public function validate(bool $throwExceptions = false): bool
+    public static function make(int $horizontal, int $vertical): self
     {
-        try {
-            if (is_null($this->x) || is_null($this->y)) {
-                throw new \InvalidArgumentException('Aspect ratio must have both X and Y set');
-            }
+        return new self($horizontal, $vertical);
+    }
 
-            if ($this->x <= 0) {
-                throw new \InvalidArgumentException('Aspect ratio X must be greater than 0');
-            }
+    public function toString(): string
+    {
+        return (string) $this;
+    }
 
-            if ($this->y <= 0) {
-                throw new \InvalidArgumentException('Aspect ratio Y must be greater than 0');
-            }
-
-            return true;
-        } catch (\InvalidArgumentException $e) {
-            if ($throwExceptions) {
-                throw $e;
-            }
-
-            return false;
-        }
+    public function toArray(): array
+    {
+        return [
+            'horizontal' => $this->horizontal,
+            'vertical' => $this->vertical,
+        ];
     }
 }

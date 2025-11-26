@@ -1,8 +1,32 @@
-/.idea
-/.vscode
-/vendor
-/node_modules
-package-lock.json
-composer.phar
+# Composer Related
 composer.lock
-.DS_Store
+/vendor
+
+# Frontend Assets
+/node_modules
+
+# Logs
+npm-debug.log
+yarn-error.log
+
+# Caches
+.phpunit.cache
+.phpunit.result.cache
+/build
+
+# IDE Helper
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# Editors
+/.idea
+/.fleet
+/.vscode
+
+# Misc
+phpunit.xml
+phpstan.neon
+/docs
+/coverage
+TODO.md

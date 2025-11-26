@@ -1,143 +1,80 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Outerweb\ImageLibrary\Components;
 
 use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Outerweb\ImageLibrary\Models\Image as ModelsImage;
-use Outerweb\ImageLibrary\Models\ImageConversion;
+use Illuminate\View\View;
+use Outerweb\ImageLibrary\Contracts\ConfiguresBreakpoints;
+use Outerweb\ImageLibrary\Facades\ImageLibrary;
+use Outerweb\ImageLibrary\Models\Image as ImageModel;
 
 class Image extends Component
 {
-    public ?string $src = null;
-
-    public ?ImageConversion $imageConversion = null;
-
-    public ?ImageConversion $fallbackImageConversion = null;
-
     public function __construct(
-        public ?ModelsImage $image,
-        public ?string $title = null,
-        public ?string $alt = null,
-        public ?string $conversion = null,
-        public string|ModelsImage|null $fallback = null,
-        public ?string $fallbackConversion = null,
-    ) {
-        $this->title = $this->title ?? $this->image->title ?? null;
-        $this->alt = $this->alt ?? $this->image->alt ?? null;
-    }
+        public ImageModel $image,
+    ) {}
 
     public function render(): View|Closure|string
     {
-        return view('image-library::components.image');
+        return view('image-library::components.image', [
+            'sources' => collect(ImageLibrary::getBreakpointEnum()::sortedCases())
+                ->map(function (ConfiguresBreakpoints $case): array {
+                    return array_filter([
+                        (object) [
+                            'media' => $this->getMediaQueryForBreakpoint($case),
+                            'srcset' => $this->getSrcsetForBreakpoint($case),
+                            'type' => $this->image->sourceImage->mime_type,
+                        ],
+                        $this->image->context?->getGenerateWebP()
+                            ? (object) [
+                                'media' => $this->getMediaQueryForBreakpoint($case),
+                                'srcset' => $this->getSrcsetForBreakpoint($case, 'webp'),
+                                'type' => 'image/webp',
+                            ]
+                            : null,
+                    ]);
+                })
+                ->flatten(1),
+        ]);
     }
 
-    public function shouldRender(): bool
+    private function getMediaQueryForBreakpoint(ConfiguresBreakpoints $breakpoint): string
     {
-        if (is_null($this->src())) {
-            return false;
+        $conditions = [];
+
+        if (array_search($breakpoint, ImageLibrary::getBreakpointEnum()::sortedCases()) !== 0) {
+            $conditions[] = '(min-width: '.$breakpoint->getMinWidth().'px)';
         }
 
-        return true;
+        if (! is_null($breakpoint->getMaxWidth())) {
+            $conditions[] = '(max-width: '.$breakpoint->getMaxWidth().'px)';
+        }
+
+        return implode(' and ', $conditions);
     }
 
-    public function src(): ?string
+    private function getSrcsetForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): string
     {
-        if ($this->src) {
-            return $this->src;
+        if (! $this->image->context?->getGenerateResponsiveVersions()) {
+            return $this->image->urlForBreakpoint($breakpoint, $extension);
         }
 
-        if ($this->conversion) {
-            $conversion = $this->getConversion();
-
-            if ($conversion) {
-                return $this->src = $conversion->getUrl();
-            }
-
-            if (is_null($this->fallback) && $this->fallbackConversion) {
-                $conversion = $this->getFallbackConversion();
-
-                if ($conversion) {
-                    $this->imageConversion = $conversion;
-
-                    return $this->src = $conversion->getUrl();
+        return $this->image->getResponsiveRelativePathsForBreakpoint($breakpoint, $extension)
+            ->map(function (string $path) use ($breakpoint): string {
+                if (preg_match('/_w(\d+)\./', $path, $m)) {
+                    $width = (int) $m[1];
+                } else {
+                    $width = $this->image->context->getMaxWidthForBreakpoint($breakpoint)
+                        ?? $this->image->sourceImage->width;
                 }
-            }
-        }
 
-        $src = $this->image?->getUrl();
+                $url = $this->image->urlForRelativePath($path);
 
-        if ($src) {
-            return $this->src = $src;
-        }
-
-        return $this->src = $this->getSrcByFallback();
-    }
-
-    public function srcset(): ?string
-    {
-        $image = $this->imageConversion ?? $this->image;
-
-        if (is_null($image)) {
-            return null;
-        }
-
-        $responsiveVariants = $image->getResponsiveVariants();
-
-        if ($responsiveVariants->isEmpty()) {
-            return null;
-        }
-
-        return $responsiveVariants->map(function ($variant) {
-            return "{$variant->url} {$variant->width}w";
-        })->implode(', ');
-    }
-
-    public function width(): ?int
-    {
-        return $this->imageConversion?->width ?? $this->image?->width;
-    }
-
-    public function height(): ?int
-    {
-        return $this->imageConversion?->height ?? $this->image?->height;
-    }
-
-    public function getConversion(): ?ImageConversion
-    {
-        if ($this->imageConversion) {
-            return $this->imageConversion;
-        }
-
-        return $this->imageConversion = $this->image?->getConversion($this->conversion);
-    }
-
-    public function getFallbackConversion(): ?ImageConversion
-    {
-        if ($this->fallbackImageConversion) {
-            return $this->fallbackImageConversion;
-        }
-
-        return $this->fallbackImageConversion = $this->image?->getConversion($this->fallbackConversion);
-    }
-
-    public function getSrcByFallback(): ?string
-    {
-        if ($this->fallback instanceof ModelsImage) {
-            $this->image = $this->fallback;
-
-            if ($this->getFallbackConversion()) {
-                $this->conversion = $this->fallbackConversion;
-            }
-
-            $this->imageConversion = null;
-            $this->fallback = null;
-            $this->fallbackImageConversion = null;
-
-            return $this->src();
-        }
-
-        return $this->fallback;
+                return "{$url} {$width}w";
+            })
+            ->implode(', ');
     }
 }
