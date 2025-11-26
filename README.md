@@ -97,11 +97,13 @@ Available breakpoints:
 -   **`Breakpoint::Medium`** (`'md'`): 768px and up - Tablets in portrait mode
 -   **`Breakpoint::Large`** (`'lg'`): 1024px and up - Tablets in landscape, small desktops
 -   **`Breakpoint::ExtraLarge`** (`'xl'`): 1280px and up - Desktop screens
--   **`Breakpoint::ExtraExtraLarge`** (`'2xl'`): 1536px and up - Large desktop screens
+-   **`Breakpoint::DoubleExtraLarge`** (`'2xl'`): 1536px and up - Large desktop screens
 
 You can use these breakpoints to define different aspect ratios, sizes, crop positions, and effects for different screen sizes, ensuring optimal image display across all devices.
 
 > **Note:** If the default breakpoints don't match your design system, you can create custom breakpoints. See [Custom Breakpoints](#custom-breakpoints) in the Configuration section.
+
+If you don't need responsive images, you can disable breakpoints globally in the config file or per ImageContext.
 
 ## Configuration
 
@@ -110,10 +112,12 @@ You can use these breakpoints to define different aspect ratios, sizes, crop pos
 The config file allows you to customize various aspects of the image library. Some key configuration options include:
 
 -   **`defaults.disk`**: The default filesystem disk for storing images if not specified during upload
+-   **`use_breakpoints`**: Enable or disable responsive breakpoints globally
 -   **`generate.webp`**: Automatically generate WebP versions of images if not specified in the image context
 -   **`generate.responsive_versions`**: Generate multiple sizes for responsive images if not specified in the image context
 -   **`defaults.crop_position`**: Default crop position for image transformations if not specified in the image context
 -   **`models`**: Customize the Eloquent models used by the package to easily extend functionality
+-   **`enums`**: Customize the enums used by the package to easily extend functionality
 -   **`spatie_image.driver`**: Choose between 'gd' or 'imagick' for image manipulations
 
 ### Javascript
@@ -169,6 +173,11 @@ class ImageLibraryServiceProvider extends BaseServiceProvider
                     Breakpoint::Large->value => 250,
                 ])
                 ->allowsMultiple(false),
+
+            // Image that does not use breakpoints
+            ImageContext::make('no_breakpoints')
+                ->label(fn (): string => __('No Breakpoints'))
+                ->useBreakpoints(false)
         ];
     }
 }
@@ -219,6 +228,17 @@ ImageContext::make('thumbnail')
     ->generateWebP(false);
 ```
 
+#### Using breakpoints
+
+By default, breakpoints are used based on the global config. You can override this per context:
+
+```php
+ImageContext::make('thumbnail')
+    ->useBreakpoints(false);
+```
+
+> ⚠️ **Caution:** Make sure to call `->useBreakpoints(false)` before any other methods that depend on breakpoints, such as `aspectRatio()`, `minWidth()`, `maxWidth()`, etc. Otherwise, you may encounter errors since those methods check if breakpoints are enabled or not.
+
 #### Generating responsive versions
 
 By default, responsive versions are generated based on the global config. You can override this per context:
@@ -227,6 +247,8 @@ By default, responsive versions are generated based on the global config. You ca
 ImageContext::make('thumbnail')
     ->generateResponsiveVersions(false);
 ```
+
+> **Note:** If you disable breakpoints for an ImageContext, responsive versions will also be disabled as these are only generated when breakpoints are used.
 
 #### Aspect Ratio
 
@@ -244,7 +266,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => AspectRatio::make(4, 3),
         Breakpoint::Large->value => AspectRatio::make(16, 9),
         Breakpoint::ExtraLarge->value => AspectRatio::make(16, 9),
-        Breakpoint::ExtraExtraLarge->value => AspectRatio::make(2, 1),
+        Breakpoint::DoubleExtraLarge->value => AspectRatio::make(2, 1),
     ]);
 
 // Per breakpoint
@@ -280,7 +302,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => 150,
         Breakpoint::Large->value => 200,
         Breakpoint::ExtraLarge->value => 250,
-        Breakpoint::ExtraExtraLarge->value => 300,
+        Breakpoint::DoubleExtraLarge->value => 300,
     ]);
 
 // Per breakpoint
@@ -316,7 +338,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => 200,
         Breakpoint::Large->value => 250,
         Breakpoint::ExtraLarge->value => 300,
-        Breakpoint::ExtraExtraLarge->value => 350,
+        Breakpoint::DoubleExtraLarge->value => 350,
     ]);
 
 // Per breakpoint
@@ -352,7 +374,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => CropPosition::Center,
         Breakpoint::Large->value => CropPosition::Bottom,
         Breakpoint::ExtraLarge->value => CropPosition::Center,
-        Breakpoint::ExtraExtraLarge->value => CropPosition::Center,
+        Breakpoint::DoubleExtraLarge->value => CropPosition::Center,
     ]);
 
 // Per breakpoint
@@ -388,7 +410,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => 10,
         Breakpoint::Large->value => 15,
         Breakpoint::ExtraLarge->value => 20,
-        Breakpoint::ExtraExtraLarge->value => 25,
+        Breakpoint::DoubleExtraLarge->value => 25,
     ]);
 
 // Per breakpoint
@@ -424,7 +446,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => true,
         Breakpoint::Large->value => false,
         Breakpoint::ExtraLarge->value => true,
-        Breakpoint::ExtraExtraLarge->value => false,
+        Breakpoint::DoubleExtraLarge->value => false,
     ]);
 
 // Per breakpoint
@@ -460,7 +482,7 @@ ImageContext::make('thumbnail')
         Breakpoint::Medium->value => true,
         Breakpoint::Large->value => false,
         Breakpoint::ExtraLarge->value => true,
-        Breakpoint::ExtraExtraLarge->value => false,
+        Breakpoint::DoubleExtraLarge->value => false,
     ]);
 
 // Per breakpoint
@@ -634,6 +656,25 @@ Update your `config/image-library.php` file to use your custom enum:
 ],
 ```
 
+### Disabling breakpoints
+
+If you application or specific context does not require image versions per breakpoint, you can disable breakpoints:
+
+#### Globally
+
+```php
+'use_breakpoints' => false,
+```
+
+#### Per ImageContext
+
+```php
+ImageContext::make('thumbnail')
+    ->useBreakpoints(false);
+```
+
+> ⚠️ **Caution:** Make sure to call `->useBreakpoints(false)` before any other methods that depend on breakpoints, such as `aspectRatio()`, `minWidth()`, `maxWidth()`, etc. Otherwise, you may encounter errors since those methods check if breakpoints are enabled or not.
+
 ## Usage
 
 ### Uploading an image
@@ -794,6 +835,28 @@ This script will set all `sizes` attributes of the picture elements automaticall
 -   The viewport is resized
 -   The picture element is added to the viewport
 -   The picture element width changes
+
+## (Re)generating images
+
+You can (re)generate images using the following artisan command:
+
+```bash
+php artisan image-library:generate
+```
+
+This will (re)generate all images files for all `image` records in the database based on their associated `ImageContext` configuration.
+
+You can also (re)generate image files for a specific image:
+
+```bash
+php artisan image-library:generate {id}
+```
+
+Or for multiple images:
+
+```bash
+php artisan image-library:generate {id1} {id2} {id3}
+```
 
 ## Upgrading
 

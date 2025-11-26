@@ -35,6 +35,16 @@ class ImageLibrary
         return Config::get('image-library.models.image');
     }
 
+    public function getImageModelKeyName(): string
+    {
+        return (new (self::getImageModel())())->getKeyName();
+    }
+
+    public function getImageModelSortOrderColumnName(): string
+    {
+        return (new (self::getImageModel())())->determineOrderColumnName();
+    }
+
     /**
      * @return class-string<SourceImage>
      */
@@ -43,13 +53,18 @@ class ImageLibrary
         return Config::get('image-library.models.source_image');
     }
 
+    public function getSourceImageModelKeyName(): string
+    {
+        return (new (self::getSourceImageModel())())->getKeyName();
+    }
+
     public function getSpatieImage(): SpatieImage
     {
         return SpatieImage::useImageDriver(Config::get('image-library.spatie_image.driver'));
     }
 
     /**
-     * @param  array<ImageContext>  $imageContexts
+     * @param  array<mixed>  $imageContexts
      */
     public function registerImageContexts(array $imageContexts): void
     {
@@ -92,6 +107,11 @@ class ImageLibrary
     public function upload(UploadedFile $file, array $attributes = []): SourceImage
     {
         return $this->getSourceImageModel()::upload($file, $attributes);
+    }
+
+    public function shouldUseBreakpoints(): bool
+    {
+        return Config::get('image-library.use_breakpoints', true);
     }
 
     public function shouldGenerateWebp(): bool

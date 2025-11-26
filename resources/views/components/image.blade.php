@@ -1,8 +1,11 @@
 @php
+    $useBreakpoints = $useBreakpoints ?? true;
+    $src = $useBreakpoints ? $image->sourceImage->url() : $image->urlForBreakpoint();
+    
     $attributes = $attributes->merge([
-        'src' => $image->sourceImage->url(),
+        'src' => $src,
         'alt' => $image->alt_text ?? $image->sourceImage->alt_text,
-        'sizes' => '1px',
+        'sizes' => $useBreakpoints ? '1px' : null,
         'data-image-library' => 'image',
         'data-image-library-id' => $image->uuid,
     ]);
@@ -11,10 +14,10 @@
 <picture>
     @foreach ($sources as $source)
         <source
-            media="{{ $source->media }}"
+            @if ($useBreakpoints && $source->media) media="{{ $source->media }}" @endif
             srcset="{{ $source->srcset }}"
             type="{{ $source->type }}"
-            sizes="1px"
+            @if ($useBreakpoints) sizes="1px" @endif
         />
     @endforeach
     <img {{ $attributes }} />

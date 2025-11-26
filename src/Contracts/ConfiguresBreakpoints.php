@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Outerweb\ImageLibrary\Contracts;
 
-interface ConfiguresBreakpoints
+use BackedEnum;
+
+interface ConfiguresBreakpoints extends BackedEnum
 {
     public static function sortedCases(): array;
 

@@ -69,14 +69,14 @@ it('can generate multiple responsive image versions', function () {
             'context' => 'context-single',
         ]);
 
-    new GenerateImageVersionJob($image->id, Breakpoint::ExtraExtraLarge)->handle();
+    new GenerateImageVersionJob($image->id, Breakpoint::DoubleExtraLarge)->handle();
 
-    new GenerateResponsiveImageVersionsJob($image->id, Breakpoint::ExtraExtraLarge)
+    new GenerateResponsiveImageVersionsJob($image->id, Breakpoint::DoubleExtraLarge)
         ->handle();
 
-    expect($image->getResponsiveRelativePathsForBreakpoint(Breakpoint::ExtraExtraLarge))
+    expect($image->getResponsiveRelativePathsForBreakpoint(Breakpoint::DoubleExtraLarge))
         ->toBeInstanceOf(Collection::class);
 
-    expect($image->getResponsiveRelativePathsForBreakpoint(Breakpoint::ExtraExtraLarge)->count())
+    expect($image->getResponsiveRelativePathsForBreakpoint(Breakpoint::DoubleExtraLarge)->count())
         ->toBeGreaterThan(0);
 });

@@ -2,11 +2,11 @@
 
 All notable changes to `image library` will be documented in this file.
 
-## 3.0.0 - 2025-11-26
+## 3.0.0 - 2025-12-22
 
 ### Changed
 
--   Complete rewrite of the package. Please refer to the (upgrade guide)[UPGRADE.md] for more information.
+-   Complete rewrite of the package. Please refer to the (upgrade guide)[./docs/upgrade-to-v3.md] for more information.
 
 ## 2.7.0 - 2025-02-27
 

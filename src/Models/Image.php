@@ -17,6 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Outerweb\ImageLibrary\Contracts\ConfiguresBreakpoints;
 use Outerweb\ImageLibrary\Database\Factories\ImageFactory;
 use Outerweb\ImageLibrary\Entities\CropData;
@@ -88,6 +89,10 @@ class Image extends Model implements Sortable
         'custom_properties' => '{}',
     ];
 
+    protected $with = [
+        'sourceImage',
+    ];
+
     public function model(): MorphTo
     {
         return $this->morphTo();
@@ -109,6 +114,17 @@ class Image extends Model implements Sortable
     public function generate(): void
     {
         $this->deleteFiles();
+
+        if (! $this->context->getUseBreakpoints()) {
+            Bus::batch([
+                new GenerateImageVersionJob($this->getKey(), null),
+            ])
+                ->onConnection(ImageLibrary::getDefaultQueueConnection())
+                ->onQueue(ImageLibrary::getDefaultQueue())
+                ->dispatch();
+
+            return;
+        }
 
         Bus::chain([
             Bus::batch(
@@ -141,14 +157,22 @@ class Image extends Model implements Sortable
         return Storage::disk($this->disk)->path($this->getRelativeBasePath());
     }
 
-    public function getRelativePathForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): string
+    public function getRelativePathForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): string
     {
         $extension ??= $this->sourceImage->extension;
+
+        if (is_null($breakpoint)) {
+            if (! $this->context->getUseBreakpoints()) {
+                return $this->getRelativeBasePath().'/default.'.$extension;
+            }
+
+            throw new InvalidArgumentException('Breakpoint must be provided when context uses breakpoints.');
+        }
 
         return $this->getRelativeBasePath().'/'.urlencode($breakpoint->getSlug()).'.'.$extension;
     }
 
-    public function getAbsolutePathForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): string
+    public function getAbsolutePathForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): string
     {
         return Storage::disk($this->disk)->path($this->getRelativePathForBreakpoint($breakpoint, $extension));
     }
@@ -183,22 +207,22 @@ class Image extends Model implements Sortable
         return Storage::disk($this->disk)->get($this->getRelativePathForBreakpoint($breakpoint, $extension));
     }
 
-    public function existsForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): bool
+    public function existsForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): bool
     {
         return Storage::disk($this->disk)->exists($this->getRelativePathForBreakpoint($breakpoint, $extension));
     }
 
-    public function missingForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): bool
+    public function missingForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): bool
     {
         return Storage::disk($this->disk)->missing($this->getRelativePathForBreakpoint($breakpoint, $extension));
     }
 
-    public function downloadForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): StreamedResponse
+    public function downloadForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): StreamedResponse
     {
         return Storage::disk($this->disk)->download($this->getRelativePathForBreakpoint($breakpoint, $extension));
     }
 
-    public function urlForBreakpoint(ConfiguresBreakpoints $breakpoint, ?string $extension = null): string
+    public function urlForBreakpoint(?ConfiguresBreakpoints $breakpoint = null, ?string $extension = null): string
     {
         $path = $this->getRelativePathForBreakpoint($breakpoint, $extension);
 
@@ -264,12 +288,12 @@ class Image extends Model implements Sortable
         );
     }
 
-    /** @return Attribute<ImageContext|null, string> */
+    /** @return Attribute<ImageContext|null, string|null> */
     protected function context(): Attribute
     {
         return Attribute::make(
             get: fn (?string $value): ?ImageContext => ImageLibrary::getImageContextByKey($value),
-            set: fn (ImageContext|string $value): string => is_string($value) ? $value : $value->getKey(),
+            set: fn (ImageContext|string|null $value): ?string => is_null($value) ? null : (is_string($value) ? $value : $value->getKey()),
         );
     }
 
@@ -316,11 +340,48 @@ class Image extends Model implements Sortable
     }
 
     /**
-     * @param  array<string, array{width: int, height: int, x: int|null, y: int|null}>|null|CropData  $cropData
+     * @param  array<string, mixed>|null|CropData  $cropData
      * @return array<string, CropData|null>
      */
     private function generateCropData(array|CropData|null $cropData): array
     {
+        $contextKey = $this->getRawOriginal('context') ?? $this->attributes['context'] ?? null;
+        $context = $contextKey ? ImageLibrary::getImageContextByKey($contextKey) : null;
+
+        if (is_null($context)) {
+            return [];
+        }
+
+        if (! $context->getUseBreakpoints()) {
+            if ($cropData instanceof CropData || is_null($cropData)) {
+                return ['default' => $cropData];
+            }
+
+            if (array_key_exists('default', $cropData)) {
+                $cropData = $cropData['default'];
+            }
+
+            if (
+                ! is_array($cropData)
+                || ! array_key_exists('width', $cropData)
+                || ! array_key_exists('height', $cropData)
+            ) {
+                return ['default' => null];
+            }
+
+            return [
+                'default' => CropData::make(
+                    $cropData['width'],
+                    $cropData['height'],
+                    $cropData['x'] ?? null,
+                    $cropData['y'] ?? null,
+                    $cropData['rotate'] ?? 0,
+                    $cropData['scaleX'] ?? 1,
+                    $cropData['scaleY'] ?? 1,
+                ),
+            ];
+        }
+
         if ($cropData instanceof CropData || is_null($cropData)) {
             return collect(ImageLibrary::getBreakpointEnum()::sortedCases())
                 ->mapWithKeys(function (BackedEnum $case) use ($cropData): array {
@@ -333,13 +394,11 @@ class Image extends Model implements Sortable
             ->mapWithKeys(function (BackedEnum $case) use ($cropData): array {
                 $data = $cropData[$case->value] ?? null;
 
-                if ($data instanceof CropData) {
-                    return [$case->value => $data];
-                }
-
                 if (
                     is_null($data)
-                    || (! isset($data['width'], $data['height']))
+                    || ! is_array($data)
+                    || ! array_key_exists('width', $data)
+                    || ! array_key_exists('height', $data)
                 ) {
                     return [$case->value => null];
                 }
@@ -349,6 +408,9 @@ class Image extends Model implements Sortable
                     $data['height'],
                     $data['x'] ?? null,
                     $data['y'] ?? null,
+                    $data['rotate'] ?? 0,
+                    $data['scaleX'] ?? 1,
+                    $data['scaleY'] ?? 1,
                 )];
             })
             ->all();

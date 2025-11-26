@@ -40,7 +40,7 @@ trait HasImages
                 [
                     'model_type' => $this->getMorphClass(),
                     'model_id' => $this->getKey(),
-                    'source_image_id' => $image->id,
+                    'source_image_id' => $image->getKey(),
                 ]
             ));
 

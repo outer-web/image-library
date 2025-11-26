@@ -82,7 +82,7 @@ describe('methods', function (): void {
             ->create();
 
         expect($image->getRelativeBasePath())
-            ->toEqual('media-library/'.$image->uuid);
+            ->toEqual('image-library/'.$image->uuid);
     });
 
     it('can return the absolute base path', function (): void {
@@ -90,7 +90,7 @@ describe('methods', function (): void {
             ->create();
 
         expect($image->getAbsoluteBasePath())
-            ->toEqual(Storage::disk($image->disk)->path('media-library/'.$image->uuid));
+            ->toEqual(Storage::disk($image->disk)->path('image-library/'.$image->uuid));
     });
 
     it('can return the relative path', function (): void {
@@ -101,7 +101,7 @@ describe('methods', function (): void {
             ]);
 
         expect($image->getRelativePath())
-            ->toEqual('media-library/'.$image->uuid.'/original.png');
+            ->toEqual('image-library/'.$image->uuid.'/original.png');
     });
 
     it('can return the absolute path', function (): void {
@@ -112,7 +112,7 @@ describe('methods', function (): void {
             ]);
 
         expect($image->getAbsolutePath())
-            ->toEqual(Storage::disk($image->disk)->path('media-library/'.$image->uuid.'/original.png'));
+            ->toEqual(Storage::disk($image->disk)->path('image-library/'.$image->uuid.'/original.png'));
     });
 
     describe('upload', function (): void {
@@ -154,7 +154,7 @@ describe('methods', function (): void {
             try {
                 SourceImage::upload($file);
             } catch (Throwable $e) {
-                expect(Storage::disk('public')->allFiles('media-library'))
+                expect(Storage::disk('public')->allFiles('image-library'))
                     ->toBeEmpty();
 
                 throw $e;
@@ -173,7 +173,7 @@ describe('methods', function (): void {
             try {
                 SourceImage::upload($file);
             } catch (Throwable $e) {
-                expect(Storage::disk('public')->allFiles('media-library'))
+                expect(Storage::disk('public')->allFiles('image-library'))
                     ->toBeEmpty();
 
                 throw $e;

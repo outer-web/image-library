@@ -64,6 +64,13 @@ describe('label', function () {
         expect($imageContext->getLabel())
             ->toBe('Thumbnail Image from Closure');
     });
+
+    it('falls back to a generated label from the key when no label is set', function () {
+        $imageContext = ImageContext::make('user_profile_image');
+
+        expect($imageContext->getLabel())
+            ->toBe('User Profile Image');
+    });
 });
 
 describe('aspect ratio', function () {
@@ -88,16 +95,16 @@ describe('aspect ratio', function () {
                 Breakpoint::Medium->value => $mobileAspectRatio,
                 Breakpoint::Large->value => $desktopAspectRatio,
                 Breakpoint::ExtraLarge->value => $desktopAspectRatio,
-                Breakpoint::ExtraExtraLarge->value => $desktopAspectRatio,
+                Breakpoint::DoubleExtraLarge->value => $desktopAspectRatio,
             ]);
 
         expect($imageContext->getAspectRatioByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Small))->toBe($mobileAspectRatio)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Medium))->toBe($mobileAspectRatio)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Large))->toBe($desktopAspectRatio)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraLarge))->toBe($desktopAspectRatio)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe($desktopAspectRatio);
+            ->and($imageContext->getAspectRatio(Breakpoint::Small))->toBe($mobileAspectRatio)
+            ->and($imageContext->getAspectRatio(Breakpoint::Medium))->toBe($mobileAspectRatio)
+            ->and($imageContext->getAspectRatio(Breakpoint::Large))->toBe($desktopAspectRatio)
+            ->and($imageContext->getAspectRatio(Breakpoint::ExtraLarge))->toBe($desktopAspectRatio)
+            ->and($imageContext->getAspectRatio(Breakpoint::DoubleExtraLarge))->toBe($desktopAspectRatio);
     });
 
     it('can set and get the aspect ratio for a specific breakpoint', function () {
@@ -110,11 +117,11 @@ describe('aspect ratio', function () {
 
         expect($imageContext->getAspectRatioByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Small))->toBe($aspectRatio1)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Medium))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Large))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe($aspectRatio2);
+            ->and($imageContext->getAspectRatio(Breakpoint::Small))->toBe($aspectRatio1)
+            ->and($imageContext->getAspectRatio(Breakpoint::Medium))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::Large))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::DoubleExtraLarge))->toBe($aspectRatio2);
     });
 
     it('can set and get the aspect ratio for all breakpoints after and including a specific breakpoint', function () {
@@ -127,11 +134,11 @@ describe('aspect ratio', function () {
 
         expect($imageContext->getAspectRatioByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Small))->toBe($aspectRatio1)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Medium))->toBe($aspectRatio1)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Large))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe($aspectRatio2);
+            ->and($imageContext->getAspectRatio(Breakpoint::Small))->toBe($aspectRatio1)
+            ->and($imageContext->getAspectRatio(Breakpoint::Medium))->toBe($aspectRatio1)
+            ->and($imageContext->getAspectRatio(Breakpoint::Large))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::DoubleExtraLarge))->toBe($aspectRatio2);
     });
 
     it('can set and get the aspect ratio for all breakpoints before and including a specific breakpoint', function () {
@@ -144,11 +151,11 @@ describe('aspect ratio', function () {
 
         expect($imageContext->getAspectRatioByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Small))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Medium))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Large))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraLarge))->toBe($aspectRatio1)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe($aspectRatio1);
+            ->and($imageContext->getAspectRatio(Breakpoint::Small))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::Medium))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::Large))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::ExtraLarge))->toBe($aspectRatio1)
+            ->and($imageContext->getAspectRatio(Breakpoint::DoubleExtraLarge))->toBe($aspectRatio1);
     });
 
     it('can set and get the aspect ratio for all breakpoints between 2 breakpoints', function () {
@@ -161,11 +168,11 @@ describe('aspect ratio', function () {
 
         expect($imageContext->getAspectRatioByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Small))->toBe($aspectRatio1)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Medium))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::Large))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
-            ->and($imageContext->getAspectRatioForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe($aspectRatio1);
+            ->and($imageContext->getAspectRatio(Breakpoint::Small))->toBe($aspectRatio1)
+            ->and($imageContext->getAspectRatio(Breakpoint::Medium))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::Large))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::ExtraLarge))->toBe($aspectRatio2)
+            ->and($imageContext->getAspectRatio(Breakpoint::DoubleExtraLarge))->toBe($aspectRatio1);
     });
 
     it('throws an exception when aspect ratio for a breakpoint is not defined', function () {
@@ -194,16 +201,16 @@ describe('minWidth', function () {
                 Breakpoint::Medium->value => 480,
                 Breakpoint::Large->value => 768,
                 Breakpoint::ExtraLarge->value => 1024,
-                Breakpoint::ExtraExtraLarge->value => 1280,
+                Breakpoint::DoubleExtraLarge->value => 1280,
             ]);
 
         expect($imageContext->getMinWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Medium))->toBe(480)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(1024)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(1280);
+            ->and($imageContext->getMinWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Medium))->toBe(480)
+            ->and($imageContext->getMinWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::ExtraLarge))->toBe(1024)
+            ->and($imageContext->getMinWidth(Breakpoint::DoubleExtraLarge))->toBe(1280);
     });
 
     it('can set and get the min width for a specific breakpoint', function () {
@@ -213,11 +220,11 @@ describe('minWidth', function () {
 
         expect($imageContext->getMinWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Small))->toBe(480)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Large))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(320);
+            ->and($imageContext->getMinWidth(Breakpoint::Small))->toBe(480)
+            ->and($imageContext->getMinWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Large))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::ExtraLarge))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::DoubleExtraLarge))->toBe(320);
     });
 
     it('can set and get the min width for all breakpoints after and including a specific breakpoint', function () {
@@ -227,11 +234,11 @@ describe('minWidth', function () {
 
         expect($imageContext->getMinWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(768);
+            ->and($imageContext->getMinWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::DoubleExtraLarge))->toBe(768);
     });
 
     it('can set and get the min width for all breakpoints before and including a specific breakpoint', function () {
@@ -241,11 +248,11 @@ describe('minWidth', function () {
 
         expect($imageContext->getMinWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Large))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(768);
+            ->and($imageContext->getMinWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Large))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::DoubleExtraLarge))->toBe(768);
     });
 
     it('can set and get the min width for all breakpoints between 2 breakpoints', function () {
@@ -255,11 +262,11 @@ describe('minWidth', function () {
 
         expect($imageContext->getMinWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Medium))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMinWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(320);
+            ->and($imageContext->getMinWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMinWidth(Breakpoint::Medium))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMinWidth(Breakpoint::DoubleExtraLarge))->toBe(320);
     });
 
     it('throws an exception when min width for a breakpoint is not defined', function () {
@@ -288,16 +295,16 @@ describe('maxWidth', function () {
                 Breakpoint::Medium->value => 480,
                 Breakpoint::Large->value => 768,
                 Breakpoint::ExtraLarge->value => 1024,
-                Breakpoint::ExtraExtraLarge->value => 1280,
+                Breakpoint::DoubleExtraLarge->value => 1280,
             ]);
 
         expect($imageContext->getMaxWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Medium))->toBe(480)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(1024)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(1280);
+            ->and($imageContext->getMaxWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Medium))->toBe(480)
+            ->and($imageContext->getMaxWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::ExtraLarge))->toBe(1024)
+            ->and($imageContext->getMaxWidth(Breakpoint::DoubleExtraLarge))->toBe(1280);
     });
 
     it('can set and get the min width for a specific breakpoint', function () {
@@ -307,11 +314,11 @@ describe('maxWidth', function () {
 
         expect($imageContext->getMaxWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Small))->toBe(480)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Large))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(320);
+            ->and($imageContext->getMaxWidth(Breakpoint::Small))->toBe(480)
+            ->and($imageContext->getMaxWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Large))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::ExtraLarge))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::DoubleExtraLarge))->toBe(320);
     });
 
     it('can set and get the min width for all breakpoints after and including a specific breakpoint', function () {
@@ -321,11 +328,11 @@ describe('maxWidth', function () {
 
         expect($imageContext->getMaxWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(768);
+            ->and($imageContext->getMaxWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::DoubleExtraLarge))->toBe(768);
     });
 
     it('can set and get the min width for all breakpoints before and including a specific breakpoint', function () {
@@ -335,11 +342,11 @@ describe('maxWidth', function () {
 
         expect($imageContext->getMaxWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Medium))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Large))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(768);
+            ->and($imageContext->getMaxWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Medium))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Large))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::DoubleExtraLarge))->toBe(768);
     });
 
     it('can set and get the min width for all breakpoints between 2 breakpoints', function () {
@@ -349,11 +356,11 @@ describe('maxWidth', function () {
 
         expect($imageContext->getMaxWidthByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Small))->toBe(320)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Medium))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::Large))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraLarge))->toBe(768)
-            ->and($imageContext->getMaxWidthForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(320);
+            ->and($imageContext->getMaxWidth(Breakpoint::Small))->toBe(320)
+            ->and($imageContext->getMaxWidth(Breakpoint::Medium))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::Large))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::ExtraLarge))->toBe(768)
+            ->and($imageContext->getMaxWidth(Breakpoint::DoubleExtraLarge))->toBe(320);
     });
 
     it('throws an exception when min width for a breakpoint is not defined', function () {
@@ -382,22 +389,22 @@ describe('cropPosition', function () {
                 Breakpoint::Medium->value => 'bottom',
                 Breakpoint::Large->value => 'left',
                 Breakpoint::ExtraLarge->value => 'right',
-                Breakpoint::ExtraExtraLarge->value => 'center',
+                Breakpoint::DoubleExtraLarge->value => 'center',
             ]);
 
         expect($imageContext->getCropPositionByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))->toBe(CropPosition::Top)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Medium))->toBe(CropPosition::Bottom)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Large))->toBe(CropPosition::Left)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraLarge))->toBe(CropPosition::Right)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(CropPosition::Center);
+            ->and($imageContext->getCropPosition(Breakpoint::Small))->toBe(CropPosition::Top)
+            ->and($imageContext->getCropPosition(Breakpoint::Medium))->toBe(CropPosition::Bottom)
+            ->and($imageContext->getCropPosition(Breakpoint::Large))->toBe(CropPosition::Left)
+            ->and($imageContext->getCropPosition(Breakpoint::ExtraLarge))->toBe(CropPosition::Right)
+            ->and($imageContext->getCropPosition(Breakpoint::DoubleExtraLarge))->toBe(CropPosition::Center);
     });
 
     it('falls back to the default crop position if not set', function () {
         $imageContext = ImageContext::make('thumbnail');
 
-        expect($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))
+        expect($imageContext->getCropPosition(Breakpoint::Small))
             ->toBe(ImageLibrary::getDefaultCropPosition());
     });
 
@@ -405,7 +412,7 @@ describe('cropPosition', function () {
         $imageContext = ImageContext::make('thumbnail')
             ->cropPosition(CropPosition::Center);
 
-        expect($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))
+        expect($imageContext->getCropPosition(Breakpoint::Small))
             ->toBe(CropPosition::Center);
     });
 
@@ -424,11 +431,11 @@ describe('cropPosition', function () {
 
         expect($imageContext->getCropPositionByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))->toBe(CropPosition::TopLeft)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Medium))->toBe(CropPosition::Center)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Large))->toBe(CropPosition::Center)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraLarge))->toBe(CropPosition::Center)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(CropPosition::Center);
+            ->and($imageContext->getCropPosition(Breakpoint::Small))->toBe(CropPosition::TopLeft)
+            ->and($imageContext->getCropPosition(Breakpoint::Medium))->toBe(CropPosition::Center)
+            ->and($imageContext->getCropPosition(Breakpoint::Large))->toBe(CropPosition::Center)
+            ->and($imageContext->getCropPosition(Breakpoint::ExtraLarge))->toBe(CropPosition::Center)
+            ->and($imageContext->getCropPosition(Breakpoint::DoubleExtraLarge))->toBe(CropPosition::Center);
     });
 
     it('can set and get the crop position for all breakpoints after and including a specific breakpoint', function () {
@@ -438,11 +445,11 @@ describe('cropPosition', function () {
 
         expect($imageContext->getCropPositionByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))->toBe(CropPosition::TopLeft)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Medium))->toBe(CropPosition::TopLeft)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Large))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraLarge))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(CropPosition::BottomRight);
+            ->and($imageContext->getCropPosition(Breakpoint::Small))->toBe(CropPosition::TopLeft)
+            ->and($imageContext->getCropPosition(Breakpoint::Medium))->toBe(CropPosition::TopLeft)
+            ->and($imageContext->getCropPosition(Breakpoint::Large))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::ExtraLarge))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::DoubleExtraLarge))->toBe(CropPosition::BottomRight);
     });
 
     it('can set and get the crop position for all breakpoints before and including a specific breakpoint', function () {
@@ -452,11 +459,11 @@ describe('cropPosition', function () {
 
         expect($imageContext->getCropPositionByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Medium))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Large))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraLarge))->toBe(CropPosition::TopLeft)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(CropPosition::TopLeft);
+            ->and($imageContext->getCropPosition(Breakpoint::Small))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::Medium))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::Large))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::ExtraLarge))->toBe(CropPosition::TopLeft)
+            ->and($imageContext->getCropPosition(Breakpoint::DoubleExtraLarge))->toBe(CropPosition::TopLeft);
     });
 
     it('can set and get the crop position for all breakpoints between 2 breakpoints', function () {
@@ -466,11 +473,11 @@ describe('cropPosition', function () {
 
         expect($imageContext->getCropPositionByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Small))->toBe(CropPosition::TopLeft)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Medium))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::Large))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraLarge))->toBe(CropPosition::BottomRight)
-            ->and($imageContext->getCropPositionForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(CropPosition::TopLeft);
+            ->and($imageContext->getCropPosition(Breakpoint::Small))->toBe(CropPosition::TopLeft)
+            ->and($imageContext->getCropPosition(Breakpoint::Medium))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::Large))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::ExtraLarge))->toBe(CropPosition::BottomRight)
+            ->and($imageContext->getCropPosition(Breakpoint::DoubleExtraLarge))->toBe(CropPosition::TopLeft);
     });
 });
 
@@ -525,16 +532,16 @@ describe('blur', function () {
                 Breakpoint::Medium->value => 4,
                 Breakpoint::Large->value => 6,
                 Breakpoint::ExtraLarge->value => 8,
-                Breakpoint::ExtraExtraLarge->value => 10,
+                Breakpoint::DoubleExtraLarge->value => 10,
             ]);
 
         expect($imageContext->getBlurByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBe(2)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Medium))->toBe(4)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Large))->toBe(6)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraLarge))->toBe(8)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(10);
+            ->and($imageContext->getBlur(Breakpoint::Small))->toBe(2)
+            ->and($imageContext->getBlur(Breakpoint::Medium))->toBe(4)
+            ->and($imageContext->getBlur(Breakpoint::Large))->toBe(6)
+            ->and($imageContext->getBlur(Breakpoint::ExtraLarge))->toBe(8)
+            ->and($imageContext->getBlur(Breakpoint::DoubleExtraLarge))->toBe(10);
     });
 
     it('can set and get the blur for a specific breakpoint', function () {
@@ -544,11 +551,11 @@ describe('blur', function () {
 
         expect($imageContext->getBlurByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBe(5)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Medium))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Large))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraLarge))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(0);
+            ->and($imageContext->getBlur(Breakpoint::Small))->toBe(5)
+            ->and($imageContext->getBlur(Breakpoint::Medium))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::Large))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::ExtraLarge))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::DoubleExtraLarge))->toBe(0);
     });
 
     it('can set and get the blur for all breakpoints after and including a specific breakpoint', function () {
@@ -558,11 +565,11 @@ describe('blur', function () {
 
         expect($imageContext->getBlurByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Medium))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Large))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraLarge))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(10);
+            ->and($imageContext->getBlur(Breakpoint::Small))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::Medium))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::Large))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::ExtraLarge))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::DoubleExtraLarge))->toBe(10);
     });
 
     it('can set and get the blur for all breakpoints before and including a specific breakpoint', function () {
@@ -572,11 +579,11 @@ describe('blur', function () {
 
         expect($imageContext->getBlurByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Medium))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Large))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraLarge))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(0);
+            ->and($imageContext->getBlur(Breakpoint::Small))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::Medium))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::Large))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::ExtraLarge))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::DoubleExtraLarge))->toBe(0);
     });
 
     it('can set and get the blur for all breakpoints between 2 breakpoints', function () {
@@ -586,11 +593,11 @@ describe('blur', function () {
 
         expect($imageContext->getBlurByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBe(0)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Medium))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::Large))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraLarge))->toBe(10)
-            ->and($imageContext->getBlurForBreakpoint(Breakpoint::ExtraExtraLarge))->toBe(0);
+            ->and($imageContext->getBlur(Breakpoint::Small))->toBe(0)
+            ->and($imageContext->getBlur(Breakpoint::Medium))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::Large))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::ExtraLarge))->toBe(10)
+            ->and($imageContext->getBlur(Breakpoint::DoubleExtraLarge))->toBe(0);
     });
 
     it('throws an exception when blur for a breakpoint is not defined', function () {
@@ -604,7 +611,7 @@ describe('blur', function () {
     it('returns null if not defined', function () {
         $imageContext = ImageContext::make('thumbnail');
 
-        expect($imageContext->getBlurForBreakpoint(Breakpoint::Small))->toBeNull();
+        expect($imageContext->getBlur(Breakpoint::Small))->toBeNull();
     });
 });
 
@@ -625,16 +632,16 @@ describe('grayscale', function () {
                 Breakpoint::Medium->value => false,
                 Breakpoint::Large->value => true,
                 Breakpoint::ExtraLarge->value => false,
-                Breakpoint::ExtraExtraLarge->value => true,
+                Breakpoint::DoubleExtraLarge->value => true,
             ]);
 
         expect($imageContext->getGrayscaleByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeTrue();
+            ->and($imageContext->getGrayscale(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::DoubleExtraLarge))->toBeTrue();
     });
 
     it('can set and get the grayscale for a specific breakpoint', function () {
@@ -644,11 +651,11 @@ describe('grayscale', function () {
 
         expect($imageContext->getGrayscaleByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Large))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getGrayscale(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::Large))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('can set and get the grayscale for all breakpoints after and including a specific breakpoint', function () {
@@ -658,11 +665,11 @@ describe('grayscale', function () {
 
         expect($imageContext->getGrayscaleByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraLarge))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeTrue();
+            ->and($imageContext->getGrayscale(Breakpoint::Small))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::ExtraLarge))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::DoubleExtraLarge))->toBeTrue();
     });
 
     it('can set and get the grayscale for all breakpoints before and including a specific breakpoint', function () {
@@ -672,11 +679,11 @@ describe('grayscale', function () {
 
         expect($imageContext->getGrayscaleByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Medium))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getGrayscale(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::Medium))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('can set and get the grayscale for all breakpoints between 2 breakpoints', function () {
@@ -686,11 +693,11 @@ describe('grayscale', function () {
 
         expect($imageContext->getGrayscaleByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeFalse()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Medium))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraLarge))->toBeTrue()
-            ->and($imageContext->getGrayscaleForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getGrayscale(Breakpoint::Small))->toBeFalse()
+            ->and($imageContext->getGrayscale(Breakpoint::Medium))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::ExtraLarge))->toBeTrue()
+            ->and($imageContext->getGrayscale(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('throws an exception when grayscale for a breakpoint is not defined', function () {
@@ -704,7 +711,7 @@ describe('grayscale', function () {
     it('returns null if not defined', function () {
         $imageContext = ImageContext::make('thumbnail');
 
-        expect($imageContext->getGrayscaleForBreakpoint(Breakpoint::Small))->toBeNull();
+        expect($imageContext->getGrayscale(Breakpoint::Small))->toBeNull();
     });
 
     test('grayscale accepts only boolean values for each breakpoint', function () {
@@ -733,16 +740,16 @@ describe('sepia', function () {
                 Breakpoint::Medium->value => false,
                 Breakpoint::Large->value => true,
                 Breakpoint::ExtraLarge->value => false,
-                Breakpoint::ExtraExtraLarge->value => true,
+                Breakpoint::DoubleExtraLarge->value => true,
             ]);
 
         expect($imageContext->getSepiaByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeTrue();
+            ->and($imageContext->getSepia(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::DoubleExtraLarge))->toBeTrue();
     });
 
     it('can set and get the sepia for a specific breakpoint', function () {
@@ -752,11 +759,11 @@ describe('sepia', function () {
 
         expect($imageContext->getSepiaByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Large))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getSepia(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::Large))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('can set and get the sepia for all breakpoints after and including a specific breakpoint', function () {
@@ -766,11 +773,11 @@ describe('sepia', function () {
 
         expect($imageContext->getSepiaByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Medium))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraLarge))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeTrue();
+            ->and($imageContext->getSepia(Breakpoint::Small))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::Medium))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::ExtraLarge))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::DoubleExtraLarge))->toBeTrue();
     });
 
     it('can set and get the sepia for all breakpoints before and including a specific breakpoint', function () {
@@ -780,11 +787,11 @@ describe('sepia', function () {
 
         expect($imageContext->getSepiaByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Medium))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraLarge))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getSepia(Breakpoint::Small))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::Medium))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::ExtraLarge))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('can set and get the sepia for all breakpoints between 2 breakpoints', function () {
@@ -794,11 +801,11 @@ describe('sepia', function () {
 
         expect($imageContext->getSepiaByBreakpoint())
             ->toHaveCount(count(Breakpoint::cases()))
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeFalse()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Medium))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::Large))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraLarge))->toBeTrue()
-            ->and($imageContext->getSepiaForBreakpoint(Breakpoint::ExtraExtraLarge))->toBeFalse();
+            ->and($imageContext->getSepia(Breakpoint::Small))->toBeFalse()
+            ->and($imageContext->getSepia(Breakpoint::Medium))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::Large))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::ExtraLarge))->toBeTrue()
+            ->and($imageContext->getSepia(Breakpoint::DoubleExtraLarge))->toBeFalse();
     });
 
     it('throws an exception when sepia for a breakpoint is not defined', function () {
@@ -812,7 +819,7 @@ describe('sepia', function () {
     it('returns null if not defined', function () {
         $imageContext = ImageContext::make('thumbnail');
 
-        expect($imageContext->getSepiaForBreakpoint(Breakpoint::Small))->toBeNull();
+        expect($imageContext->getSepia(Breakpoint::Small))->toBeNull();
     });
 
     test('sepia accepts only boolean values for each breakpoint', function () {
@@ -879,5 +886,25 @@ describe('generateResponsiveVersions', function () {
 
         expect($imageContext->getGenerateResponsiveVersions())
             ->toBeFalse();
+    });
+});
+
+describe('optional breakpoints', function () {
+    it('throws exception when trying to set array values for context that does not use breakpoints', function () {
+        $context = ImageContext::make('email')
+            ->useBreakpoints(false);
+
+        expect(fn () => $context->aspectRatio(['sm' => AspectRatio::make(16, 9)]))
+            ->toThrow(InvalidArgumentException::class, 'Aspect ratio must be an instance of AspectRatio when breakpoints are disabled');
+    });
+
+    it('can set single values for context that does not use breakpoints', function () {
+        $context = ImageContext::make('email')
+            ->useBreakpoints(false)
+            ->aspectRatio(AspectRatio::make(16, 9));
+
+        expect($context->getAspectRatio())->not->toBeNull();
+        expect($context->getAspectRatio()->horizontal)->toBe(16);
+        expect($context->getAspectRatio()->vertical)->toBe(9);
     });
 });

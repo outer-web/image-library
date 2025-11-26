@@ -26,6 +26,7 @@ return [
     'enums' => [
         'breakpoint' => Breakpoint::class,
     ],
+    'use_breakpoints' => true,
     'generate' => [
         'webp' => true,
         'responsive_versions' => true,

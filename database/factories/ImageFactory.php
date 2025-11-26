@@ -21,7 +21,7 @@ class ImageFactory extends Factory
         return [
             'source_image_id' => ImageLibrary::getSourceImageModel()::factory(),
             'disk' => function (array $attributes) {
-                return ImageLibrary::getSourceImageModel()::find($attributes['source_image_id'])?->disk ?? ImageLibrary::getDefaultDisk();
+                return ImageLibrary::getSourceImageModel()::find($attributes['source_image_id'])->disk ?? ImageLibrary::getDefaultDisk();
             },
             'context' => fake()->randomElement(ImageLibrary::getImageContexts()),
             'crop_data' => function (array $attributes): array {
@@ -39,6 +39,9 @@ class ImageFactory extends Factory
                         y: fake()->numberBetween(0, max(0, $maxHeight - $height)),
                         width: $width,
                         height: $height,
+                        rotate: fake()->randomElement([0, 90, 180, 270]),
+                        scaleX: fake()->randomElement([1, -1]),
+                        scaleY: fake()->randomElement([1, -1]),
                     )];
                 })
                     ->all();

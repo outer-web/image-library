@@ -123,7 +123,7 @@ it('can get an image context by its key', function () {
 
     expect($fetchedContext)
         ->toBeInstanceOf(ImageContext::class)
-        ->and($fetchedContext?->getKey())
+        ->and($fetchedContext->getKey())
         ->toEqual('context-single');
 });
 

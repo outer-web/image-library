@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Outerweb\ImageLibrary\Entities\AspectRatio;
@@ -88,7 +90,8 @@ describe('mutators and casts', function (): void {
         $image = Image::factory()
             ->forModel($user)
             ->create([
-                'crop_data' => CropData::make(10, 10, 100, 100),
+                'context' => 'thumbnail',
+                'crop_data' => CropData::make(10, 10, 100, 100, 0, 1, 1),
             ])
             ->refresh();
 
@@ -227,7 +230,7 @@ describe('methods', function (): void {
                 ->create();
 
             expect($image->getRelativeBasePath())
-                ->toBe("media-library/{$image->sourceImage->uuid}/{$image->uuid}");
+                ->toBe("image-library/{$image->sourceImage->uuid}/{$image->uuid}");
         });
     });
 
@@ -241,7 +244,7 @@ describe('methods', function (): void {
                 ->create();
 
             expect($image->getAbsoluteBasePath())
-                ->toBe(Storage::disk($image->disk)->path("media-library/{$image->sourceImage->uuid}/{$image->uuid}"));
+                ->toBe(Storage::disk($image->disk)->path("image-library/{$image->sourceImage->uuid}/{$image->uuid}"));
         });
     });
 
@@ -255,10 +258,10 @@ describe('methods', function (): void {
                 ->create();
 
             expect($image->getRelativePathForBreakpoint(Breakpoint::Small))
-                ->toBe("media-library/{$image->sourceImage->uuid}/{$image->uuid}/sm.{$image->sourceImage->extension}");
+                ->toBe("image-library/{$image->sourceImage->uuid}/{$image->uuid}/sm.{$image->sourceImage->extension}");
 
             expect($image->getRelativePathForBreakpoint(Breakpoint::Medium, 'png'))
-                ->toBe("media-library/{$image->sourceImage->uuid}/{$image->uuid}/md.png");
+                ->toBe("image-library/{$image->sourceImage->uuid}/{$image->uuid}/md.png");
         });
     });
 
@@ -272,10 +275,10 @@ describe('methods', function (): void {
                 ->create();
 
             expect($image->getAbsolutePathForBreakpoint(Breakpoint::Small))
-                ->toBe(Storage::disk($image->disk)->path("media-library/{$image->sourceImage->uuid}/{$image->uuid}/sm.{$image->sourceImage->extension}"));
+                ->toBe(Storage::disk($image->disk)->path("image-library/{$image->sourceImage->uuid}/{$image->uuid}/sm.{$image->sourceImage->extension}"));
 
             expect($image->getAbsolutePathForBreakpoint(Breakpoint::Medium, 'png'))
-                ->toBe(Storage::disk($image->disk)->path("media-library/{$image->sourceImage->uuid}/{$image->uuid}/md.png"));
+                ->toBe(Storage::disk($image->disk)->path("image-library/{$image->sourceImage->uuid}/{$image->uuid}/md.png"));
         });
     });
 
@@ -294,7 +297,8 @@ describe('methods', function (): void {
                     'source_image_id' => $sourceImage->id,
                 ]);
 
-            GenerateImageVersionJob::dispatchSync($image, Breakpoint::Small);
+            $job = new GenerateImageVersionJob($image, Breakpoint::Small);
+            $job->handle();
 
             $breakpointImage = $image->getForBreakpoint(Breakpoint::Small);
 
@@ -322,7 +326,8 @@ describe('methods', function (): void {
             expect($image->existsForBreakpoint(Breakpoint::Small))
                 ->toBeFalse();
 
-            GenerateImageVersionJob::dispatchSync($image, Breakpoint::Small);
+            $job = new GenerateImageVersionJob($image, Breakpoint::Small);
+            $job->handle();
 
             expect($image->existsForBreakpoint(Breakpoint::Small))
                 ->toBeTrue();
@@ -347,7 +352,8 @@ describe('methods', function (): void {
             expect($image->missingForBreakpoint(Breakpoint::Small))
                 ->toBeTrue();
 
-            GenerateImageVersionJob::dispatchSync($image, Breakpoint::Small);
+            $job = new GenerateImageVersionJob($image, Breakpoint::Small);
+            $job->handle();
 
             expect($image->missingForBreakpoint(Breakpoint::Small))
                 ->toBeFalse();
@@ -369,7 +375,8 @@ describe('methods', function (): void {
                     'source_image_id' => $sourceImage->id,
                 ]);
 
-            GenerateImageVersionJob::dispatchSync($image, Breakpoint::Small);
+            $job = new GenerateImageVersionJob($image, Breakpoint::Small);
+            $job->handle();
 
             $response = $image->downloadForBreakpoint(Breakpoint::Small);
 
@@ -432,8 +439,8 @@ describe('methods', function (): void {
         });
     });
 
-    describe('temporaryUrlForBreakpoint', function (): void {
-        it('can return a temporary URL of the source image file', function (): void {
+    describe('urlForRelativePath', function (): void {
+        it('returns a URL for the given relative path', function (): void {
             $user = User::factory()
                 ->create();
 
@@ -447,9 +454,128 @@ describe('methods', function (): void {
                     'source_image_id' => $sourceImage->id,
                 ]);
 
-            GenerateImageVersionJob::dispatchSync($image, Breakpoint::Small);
+            $relativePath = "image-library/{$image->sourceImage->uuid}/{$image->uuid}/test-file.jpg";
 
-            $url = $image->temporaryUrlForBreakpoint(Breakpoint::Small, now()->addMinutes(30));
+            $url = $image->urlForRelativePath($relativePath);
+
+            expect($url)
+                ->toBeString()
+                ->not->toBeEmpty()
+                ->toContain($relativePath);
+        });
+
+        it('returns a temporary URL if configured to use temporary URLs for the disk', function (): void {
+            $user = User::factory()
+                ->create();
+
+            $file = UploadedFile::fake()->image('example-image.jpg', 10, 10);
+
+            $sourceImage = SourceImage::upload($file);
+
+            $image = Image::factory()
+                ->forModel($user)
+                ->create([
+                    'source_image_id' => $sourceImage->id,
+                ]);
+
+            ImageLibrary::partialMock();
+
+            ImageLibrary::shouldReceive('shouldUseTemporaryUrlsForDisk')
+                ->with($image->disk)
+                ->andReturn(true);
+
+            ImageLibrary::shouldReceive('getTemporaryUrlExpirationMinutesForDisk')
+                ->with($image->disk)
+                ->andReturn(60);
+
+            $relativePath = "image-library/{$image->sourceImage->uuid}/{$image->uuid}/test-file.jpg";
+
+            $url = $image->urlForRelativePath($relativePath);
+
+            expect($url)
+                ->toBeString()
+                ->not->toBeEmpty();
+        });
+    });
+
+    describe('temporaryUrlForRelativePath', function (): void {
+        it('returns a temporary URL for the given relative path', function (): void {
+            $user = User::factory()
+                ->create();
+
+            $file = UploadedFile::fake()->image('example-image.jpg', 10, 10);
+
+            $sourceImage = SourceImage::upload($file);
+
+            $image = Image::factory()
+                ->forModel($user)
+                ->create([
+                    'source_image_id' => $sourceImage->id,
+                ]);
+
+            ImageLibrary::partialMock();
+
+            ImageLibrary::shouldReceive('getTemporaryUrlExpirationMinutesForDisk')
+                ->with($image->disk)
+                ->andReturn(60);
+
+            $relativePath = "image-library/{$image->sourceImage->uuid}/{$image->uuid}/test-file.jpg";
+
+            $url = $image->temporaryUrlForRelativePath($relativePath);
+
+            expect($url)
+                ->toBeString()
+                ->not->toBeEmpty();
+        });
+
+        it('accepts custom expiration time', function (): void {
+            $user = User::factory()
+                ->create();
+
+            $file = UploadedFile::fake()->image('example-image.jpg', 10, 10);
+
+            $sourceImage = SourceImage::upload($file);
+
+            $image = Image::factory()
+                ->forModel($user)
+                ->create([
+                    'source_image_id' => $sourceImage->id,
+                ]);
+
+            $relativePath = "image-library/{$image->sourceImage->uuid}/{$image->uuid}/test-file.jpg";
+            $customExpiration = now()->addHours(2);
+
+            $url = $image->temporaryUrlForRelativePath($relativePath, $customExpiration);
+
+            expect($url)
+                ->toBeString()
+                ->not->toBeEmpty();
+        });
+
+        it('accepts custom options for temporary URL generation', function (): void {
+            $user = User::factory()
+                ->create();
+
+            $file = UploadedFile::fake()->image('example-image.jpg', 10, 10);
+
+            $sourceImage = SourceImage::upload($file);
+
+            $image = Image::factory()
+                ->forModel($user)
+                ->create([
+                    'source_image_id' => $sourceImage->id,
+                ]);
+
+            ImageLibrary::partialMock();
+
+            ImageLibrary::shouldReceive('getTemporaryUrlExpirationMinutesForDisk')
+                ->with($image->disk)
+                ->andReturn(60);
+
+            $relativePath = "image-library/{$image->sourceImage->uuid}/{$image->uuid}/test-file.jpg";
+            $options = ['ResponseContentType' => 'image/jpeg'];
+
+            $url = $image->temporaryUrlForRelativePath($relativePath, null, $options);
 
             expect($url)
                 ->toBeString()
@@ -620,3 +746,104 @@ describe('relations', function (): void {
 });
 
 describe('scopes', function (): void {});
+
+describe('optional breakpoints', function (): void {
+    it('can create an image with a context that does not use breakpoints', function () {
+        $sourceImage = SourceImage::factory()->create();
+        $user = User::factory()->create();
+
+        $context = ImageContext::make('email')
+            ->useBreakpoints(false);
+
+        ImageLibrary::registerImageContext($context);
+
+        $image = Image::create([
+            'source_image_id' => $sourceImage->id,
+            'model_type' => $user->getMorphClass(),
+            'model_id' => $user->id,
+            'context' => $context,
+            'disk' => 'public',
+        ]);
+
+        expect($image->context->getUseBreakpoints())->toBeFalse();
+    });
+
+    it('dispatches GenerateImageVersionJob with null breakpoint when context does not use breakpoints', function () {
+        Queue::fake();
+        Bus::fake();
+
+        $sourceImage = SourceImage::factory()->create();
+        $user = User::factory()->create();
+
+        $context = ImageContext::make('email')
+            ->useBreakpoints(false);
+
+        ImageLibrary::registerImageContext($context);
+
+        $image = Image::create([
+            'source_image_id' => $sourceImage->id,
+            'model_type' => $user->getMorphClass(),
+            'model_id' => $user->id,
+            'context' => $context,
+            'disk' => 'public',
+        ]);
+
+        Bus::assertBatched(function ($batch) use ($image) {
+            return $batch->jobs->contains(function ($job) use ($image) {
+                return $job instanceof GenerateImageVersionJob
+                    && $job->imageId === $image->id
+                    && is_null($job->breakpoint);
+            });
+        });
+    });
+
+    it('dispatches GenerateImageVersionJob with null breakpoint when global config disables breakpoints', function () {
+        Queue::fake();
+        Bus::fake();
+        Config::set('image-library.use_breakpoints', false);
+
+        $sourceImage = SourceImage::factory()->create();
+        $user = User::factory()->create();
+
+        // Create a context that inherits global config (no explicit useBreakpoints call)
+        $context = ImageContext::make('global-disabled');
+        ImageLibrary::registerImageContext($context);
+
+        $image = Image::create([
+            'source_image_id' => $sourceImage->id,
+            'model_type' => $user->getMorphClass(),
+            'model_id' => $user->id,
+            'context' => $context,
+            'disk' => 'public',
+        ]);
+
+        Bus::assertBatched(function ($batch) use ($image) {
+            return $batch->jobs->contains(function ($job) use ($image) {
+                return $job instanceof GenerateImageVersionJob
+                    && $job->imageId === $image->id
+                    && is_null($job->breakpoint);
+            });
+        });
+    });
+
+    it('can get image paths without specifying breakpoint when breakpoints are disabled', function () {
+        $sourceImage = SourceImage::factory()->create();
+        $user = User::factory()->create();
+
+        $context = ImageContext::make('email')
+            ->useBreakpoints(false);
+
+        ImageLibrary::registerImageContext($context);
+
+        $image = Image::create([
+            'source_image_id' => $sourceImage->id,
+            'model_type' => $user->getMorphClass(),
+            'model_id' => $user->id,
+            'context' => $context,
+            'disk' => 'public',
+        ]);
+
+        expect($image->getRelativePathForBreakpoint())->toBe($image->getRelativeBasePath().'/default.'.$sourceImage->extension);
+        expect($image->getRelativePathForBreakpoint(null, 'webp'))->toBe($image->getRelativeBasePath().'/default.webp');
+    });
+});

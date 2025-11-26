@@ -29,6 +29,9 @@ return new class extends Migration
             $table->json('custom_properties')
                 ->nullable();
             $table->timestamps();
+
+            $table->index(['created_at', 'disk']);
+            $table->index(['name', 'disk']);
         });
     }
 

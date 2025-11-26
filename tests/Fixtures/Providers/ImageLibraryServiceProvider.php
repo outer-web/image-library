@@ -25,7 +25,7 @@ class ImageLibraryServiceProvider extends BaseImageLibraryServiceProvider
                     Breakpoint::Medium->value => 600,
                     Breakpoint::Large->value => 900,
                     Breakpoint::ExtraLarge->value => 1200,
-                    Breakpoint::ExtraExtraLarge->value => 1500,
+                    Breakpoint::DoubleExtraLarge->value => 1500,
                 ])
                 ->allowsMultiple(false),
             ImageContext::make('context-multiple')
@@ -37,7 +37,7 @@ class ImageLibraryServiceProvider extends BaseImageLibraryServiceProvider
                     Breakpoint::Medium->value => 600,
                     Breakpoint::Large->value => 900,
                     Breakpoint::ExtraLarge->value => 1200,
-                    Breakpoint::ExtraExtraLarge->value => 1500,
+                    Breakpoint::DoubleExtraLarge->value => 1500,
                 ])
                 ->allowsMultiple(true),
         ];

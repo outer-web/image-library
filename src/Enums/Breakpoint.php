@@ -13,7 +13,7 @@ enum Breakpoint: string implements ConfiguresBreakpoints
     case Medium = 'md';
     case Large = 'lg';
     case ExtraLarge = 'xl';
-    case ExtraExtraLarge = '2xl';
+    case DoubleExtraLarge = '2xl';
 
     public static function sortedCases(): array
     {
@@ -25,11 +25,11 @@ enum Breakpoint: string implements ConfiguresBreakpoints
     public function getLabel(): string
     {
         return match ($this) {
-            self::Small => __('image-library::breakpoints.sm'),
-            self::Medium => __('image-library::breakpoints.md'),
-            self::Large => __('image-library::breakpoints.lg'),
-            self::ExtraLarge => __('image-library::breakpoints.xl'),
-            self::ExtraExtraLarge => __('image-library::breakpoints.2xl'),
+            self::Small => __('image-library::translations.breakpoints.sm'),
+            self::Medium => __('image-library::translations.breakpoints.md'),
+            self::Large => __('image-library::translations.breakpoints.lg'),
+            self::ExtraLarge => __('image-library::translations.breakpoints.xl'),
+            self::DoubleExtraLarge => __('image-library::translations.breakpoints.2xl'),
         };
     }
 
@@ -40,7 +40,7 @@ enum Breakpoint: string implements ConfiguresBreakpoints
             self::Medium => 768,
             self::Large => 1024,
             self::ExtraLarge => 1280,
-            self::ExtraExtraLarge => 1536,
+            self::DoubleExtraLarge => 1536,
         };
     }
 

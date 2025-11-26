@@ -209,7 +209,7 @@ class SourceImage extends Model
         ];
     }
 
-    /** @return Attribute<string, never> */
+    /** @return Attribute<non-falsy-string, never> */
     protected function nameWithExtension(): Attribute
     {
         return Attribute::get(

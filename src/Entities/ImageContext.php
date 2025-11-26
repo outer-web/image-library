@@ -43,6 +43,8 @@ class ImageContext
 
     protected bool $allowsMultiple = false;
 
+    protected ?bool $useBreakpoints = null;
+
     protected ?bool $generateWebP = null;
 
     protected ?bool $generateResponsiveVersions = null;
@@ -84,6 +86,18 @@ class ImageContext
     /** @param AspectRatio|array<string, AspectRatio> $aspectRatio */
     public function aspectRatio(AspectRatio|array $aspectRatio): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($aspectRatio)) {
+                throw new InvalidArgumentException("Aspect ratio must be an instance of AspectRatio when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->aspectRatioByBreakpoint = [
+                'default' => $aspectRatio,
+            ];
+
+            return $this;
+        }
+
         $this->aspectRatioByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($aspectRatio) {
                 if (is_array($aspectRatio)) {
@@ -103,6 +117,10 @@ class ImageContext
 
     public function aspectRatioForBreakpoint(ConfiguresBreakpoints $breakpoint, AspectRatio $aspectRatio): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set aspect ratio for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->aspectRatioByBreakpoint[$breakpoint->value] = $aspectRatio;
 
         return $this;
@@ -110,6 +128,10 @@ class ImageContext
 
     public function aspectRatioFromBreakpoint(ConfiguresBreakpoints $breakpoint, AspectRatio $aspectRatio): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set aspect ratio from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -126,6 +148,10 @@ class ImageContext
 
     public function aspectRatioToBreakpoint(ConfiguresBreakpoints $breakpoint, AspectRatio $aspectRatio): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set aspect ratio to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -142,6 +168,10 @@ class ImageContext
 
     public function aspectRatioBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, AspectRatio $aspectRatio): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set aspect ratio between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $breakpoints = $this->getBreakpoints();
 
         $startIndex = $breakpoints->search(function (ConfiguresBreakpoints $bp) use ($startBreakpoint) {
@@ -161,20 +191,44 @@ class ImageContext
         return $this;
     }
 
+    public function getAspectRatio(?ConfiguresBreakpoints $breakpoint = null): ?AspectRatio
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->aspectRatioByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->aspectRatioByBreakpoint[$breakpoint->value] ?? null;
+    }
+
     /** @return array<string, AspectRatio> */
     public function getAspectRatioByBreakpoint(): array
     {
-        return $this->aspectRatioByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get aspect ratios by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getAspectRatioForBreakpoint(ConfiguresBreakpoints $breakpoint): ?AspectRatio
-    {
-        return $this->aspectRatioByBreakpoint[$breakpoint->value] ?? null;
+        return $this->aspectRatioByBreakpoint;
     }
 
     /** @param int|array<string, int> $minWidth */
     public function minWidth(int|array $minWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($minWidth)) {
+                throw new InvalidArgumentException("Min width must be an integer when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->minWidthByBreakpoint = [
+                'default' => $minWidth,
+            ];
+
+            return $this;
+        }
+
         $this->minWidthByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($minWidth) {
                 if (is_array($minWidth)) {
@@ -194,6 +248,10 @@ class ImageContext
 
     public function minWidthForBreakpoint(ConfiguresBreakpoints $breakpoint, int $minWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set min width for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->minWidthByBreakpoint[$breakpoint->value] = $minWidth;
 
         return $this;
@@ -201,6 +259,10 @@ class ImageContext
 
     public function minWidthFromBreakpoint(ConfiguresBreakpoints $breakpoint, int $minWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set min width from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -217,6 +279,10 @@ class ImageContext
 
     public function minWidthToBreakpoint(ConfiguresBreakpoints $breakpoint, int $minWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set min width to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -233,6 +299,10 @@ class ImageContext
 
     public function minWidthBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, int $minWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set min width between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $breakpoints = $this->getBreakpoints();
 
         $startIndex = $breakpoints->search(function (ConfiguresBreakpoints $bp) use ($startBreakpoint) {
@@ -252,20 +322,44 @@ class ImageContext
         return $this;
     }
 
+    public function getMinWidth(?ConfiguresBreakpoints $breakpoint = null): ?int
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->minWidthByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->minWidthByBreakpoint[$breakpoint->value] ?? null;
+    }
+
     /** @return array<string, int> */
     public function getMinWidthByBreakpoint(): array
     {
-        return $this->minWidthByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get min widths by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getMinWidthForBreakpoint(ConfiguresBreakpoints $breakpoint): ?int
-    {
-        return $this->minWidthByBreakpoint[$breakpoint->value] ?? null;
+        return $this->minWidthByBreakpoint;
     }
 
     /** @param int|array<string, int> $maxWidth */
     public function maxWidth(int|array $maxWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($maxWidth)) {
+                throw new InvalidArgumentException("Max width must be an integer when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->maxWidthByBreakpoint = [
+                'default' => $maxWidth,
+            ];
+
+            return $this;
+        }
+
         $this->maxWidthByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($maxWidth) {
                 if (is_array($maxWidth)) {
@@ -283,6 +377,10 @@ class ImageContext
 
     public function maxWidthForBreakpoint(ConfiguresBreakpoints $breakpoint, int $maxWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set max width for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->maxWidthByBreakpoint[$breakpoint->value] = $maxWidth;
 
         return $this;
@@ -290,6 +388,10 @@ class ImageContext
 
     public function maxWidthFromBreakpoint(ConfiguresBreakpoints $breakpoint, int $maxWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set max width from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -306,6 +408,10 @@ class ImageContext
 
     public function maxWidthToBreakpoint(ConfiguresBreakpoints $breakpoint, int $maxWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set max width to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -322,6 +428,10 @@ class ImageContext
 
     public function maxWidthBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, int $maxWidth): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set max width between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $breakpoints = $this->getBreakpoints();
 
         $startIndex = $breakpoints->search(function (ConfiguresBreakpoints $bp) use ($startBreakpoint) {
@@ -341,20 +451,46 @@ class ImageContext
         return $this;
     }
 
+    public function getMaxWidth(?ConfiguresBreakpoints $breakpoint = null): ?int
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->maxWidthByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->maxWidthByBreakpoint[$breakpoint->value] ?? null;
+    }
+
     /** @return array<string, int> */
     public function getMaxWidthByBreakpoint(): array
     {
-        return $this->maxWidthByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get max widths by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getMaxWidthForBreakpoint(ConfiguresBreakpoints $breakpoint): ?int
-    {
-        return $this->maxWidthByBreakpoint[$breakpoint->value] ?? null;
+        return $this->maxWidthByBreakpoint;
     }
 
     /** @param CropPosition|string|array<string, CropPosition|string> $cropPosition */
     public function cropPosition(CropPosition|string|array $cropPosition): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($cropPosition)) {
+                throw new InvalidArgumentException("Crop position must be an instance of CropPosition or string when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $cropPosition = $cropPosition instanceof CropPosition ? $cropPosition : CropPosition::from($cropPosition);
+
+            $this->cropPositionByBreakpoint = [
+                'default' => $cropPosition,
+            ];
+
+            return $this;
+        }
+
         $this->cropPositionByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($cropPosition) {
                 if (is_array($cropPosition)) {
@@ -379,6 +515,10 @@ class ImageContext
 
     public function cropPositionForBreakpoint(ConfiguresBreakpoints $breakpoint, CropPosition|string $cropPosition): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set crop position for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $cropPosition = $cropPosition instanceof CropPosition ? $cropPosition : CropPosition::from($cropPosition);
 
         $this->cropPositionByBreakpoint[$breakpoint->value] = $cropPosition;
@@ -388,6 +528,10 @@ class ImageContext
 
     public function cropPositionFromBreakpoint(ConfiguresBreakpoints $breakpoint, CropPosition|string $cropPosition): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set crop position from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $cropPosition = $cropPosition instanceof CropPosition ? $cropPosition : CropPosition::from($cropPosition);
 
         $index = $this->getBreakpoints()
@@ -406,6 +550,10 @@ class ImageContext
 
     public function cropPositionToBreakpoint(ConfiguresBreakpoints $breakpoint, CropPosition|string $cropPosition): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set crop position to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $cropPosition = $cropPosition instanceof CropPosition ? $cropPosition : CropPosition::from($cropPosition);
 
         $index = $this->getBreakpoints()
@@ -424,6 +572,10 @@ class ImageContext
 
     public function cropPositionBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, CropPosition|string $cropPosition): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set crop position between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $cropPosition = $cropPosition instanceof CropPosition ? $cropPosition : CropPosition::from($cropPosition);
 
         $breakpoints = $this->getBreakpoints();
@@ -445,20 +597,46 @@ class ImageContext
         return $this;
     }
 
+    public function getCropPosition(?ConfiguresBreakpoints $breakpoint = null): ?CropPosition
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->cropPositionByBreakpoint['default'] ?? ImageLibrary::getDefaultCropPosition();
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->cropPositionByBreakpoint[$breakpoint->value] ?? ImageLibrary::getDefaultCropPosition();
+    }
+
     /** @return array<string, CropPosition> */
     public function getCropPositionByBreakpoint(): array
     {
-        return $this->cropPositionByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get crop positions by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getCropPositionForBreakpoint(ConfiguresBreakpoints $breakpoint): ?CropPosition
-    {
-        return $this->cropPositionByBreakpoint[$breakpoint->value] ?? ImageLibrary::getDefaultCropPosition();
+        return $this->cropPositionByBreakpoint;
     }
 
     /** @param int|array<string, int> $blur */
     public function blur(int|array $blur): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($blur)) {
+                throw new InvalidArgumentException("Blur must be an integer when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->validateBlurValue($blur);
+
+            $this->blurByBreakpoint = [
+                'default' => $blur,
+            ];
+
+            return $this;
+        }
+
         $this->blurByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($blur) {
                 if (is_array($blur)) {
@@ -503,6 +681,10 @@ class ImageContext
 
     public function blurForBreakpoint(ConfiguresBreakpoints $breakpoint, int $blur): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set blur for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->validateBlurValue($blur, $breakpoint);
 
         $this->blurByBreakpoint[$breakpoint->value] = $blur;
@@ -512,6 +694,10 @@ class ImageContext
 
     public function blurFromBreakpoint(ConfiguresBreakpoints $breakpoint, int $blur): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set blur from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->validateBlurValue($blur, $breakpoint);
 
         $index = $this->getBreakpoints()
@@ -530,6 +716,10 @@ class ImageContext
 
     public function blurToBreakpoint(ConfiguresBreakpoints $breakpoint, int $blur): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set blur to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->validateBlurValue($blur, $breakpoint);
 
         $index = $this->getBreakpoints()
@@ -548,6 +738,10 @@ class ImageContext
 
     public function blurBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, int $blur): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set blur between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->validateBlurValue($blur);
 
         $breakpoints = $this->getBreakpoints();
@@ -569,20 +763,46 @@ class ImageContext
         return $this;
     }
 
+    public function getBlur(?ConfiguresBreakpoints $breakpoint = null): ?int
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->blurByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->blurByBreakpoint[$breakpoint->value] ?? null;
+    }
+
     /** @return array<string, int> */
     public function getBlurByBreakpoint(): array
     {
-        return $this->blurByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get blur values by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getBlurForBreakpoint(ConfiguresBreakpoints $breakpoint): ?int
-    {
-        return $this->blurByBreakpoint[$breakpoint->value] ?? null;
+        return $this->blurByBreakpoint;
     }
 
     /** @param bool|array<string, bool> $greyscale */
     public function greyscale(bool|array $greyscale = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($greyscale)) {
+                throw new InvalidArgumentException("Greyscale must be a boolean when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->validateGreyscaleValue($greyscale);
+
+            $this->greyscaleByBreakpoint = [
+                'default' => $greyscale,
+            ];
+
+            return $this;
+        }
+
         $this->greyscaleByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($greyscale) {
                 if (is_array($greyscale)) {
@@ -623,6 +843,10 @@ class ImageContext
 
     public function greyscaleForBreakpoint(ConfiguresBreakpoints $breakpoint, bool $greyscale = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set greyscale for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->greyscaleByBreakpoint[$breakpoint->value] = $greyscale;
 
         return $this;
@@ -635,6 +859,10 @@ class ImageContext
 
     public function greyscaleFromBreakpoint(ConfiguresBreakpoints $breakpoint, bool $greyscale = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set greyscale from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -656,6 +884,10 @@ class ImageContext
 
     public function greyscaleToBreakpoint(ConfiguresBreakpoints $breakpoint, bool $greyscale = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set greyscale to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -677,6 +909,10 @@ class ImageContext
 
     public function greyscaleBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, bool $greyscale = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set greyscale between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $breakpoints = $this->getBreakpoints();
 
         $startIndex = $breakpoints->search(function (ConfiguresBreakpoints $bp) use ($startBreakpoint) {
@@ -701,9 +937,31 @@ class ImageContext
         return $this->greyscaleBetweenBreakpoints($startBreakpoint, $endBreakpoint, $greyscale);
     }
 
+    public function getGreyscale(?ConfiguresBreakpoints $breakpoint = null): ?bool
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->greyscaleByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->greyscaleByBreakpoint[$breakpoint->value] ?? null;
+    }
+
+    public function getGrayscale(?ConfiguresBreakpoints $breakpoint = null): ?bool
+    {
+        return $this->getGreyscale($breakpoint);
+    }
+
     /** @return array<string, bool> */
     public function getGreyscaleByBreakpoint(): array
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get greyscale values by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         return $this->greyscaleByBreakpoint;
     }
 
@@ -713,19 +971,23 @@ class ImageContext
         return $this->getGreyscaleByBreakpoint();
     }
 
-    public function getGreyscaleForBreakpoint(ConfiguresBreakpoints $breakpoint): ?bool
-    {
-        return $this->greyscaleByBreakpoint[$breakpoint->value] ?? null;
-    }
-
-    public function getGrayscaleForBreakpoint(ConfiguresBreakpoints $breakpoint): ?bool
-    {
-        return $this->getGreyscaleForBreakpoint($breakpoint);
-    }
-
     /** @param bool|array<string, bool> $sepia */
     public function sepia(bool|array $sepia = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            if (is_array($sepia)) {
+                throw new InvalidArgumentException("Sepia must be a boolean when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+            }
+
+            $this->validateSepiaValue($sepia);
+
+            $this->sepiaByBreakpoint = [
+                'default' => $sepia,
+            ];
+
+            return $this;
+        }
+
         $this->sepiaByBreakpoint = $this->getBreakpoints()
             ->mapWithKeys(function (ConfiguresBreakpoints $breakpoint) use ($sepia) {
                 if (is_array($sepia)) {
@@ -760,6 +1022,10 @@ class ImageContext
 
     public function sepiaForBreakpoint(ConfiguresBreakpoints $breakpoint, bool $sepia = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set sepia for breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $this->sepiaByBreakpoint[$breakpoint->value] = $sepia;
 
         return $this;
@@ -767,6 +1033,10 @@ class ImageContext
 
     public function sepiaFromBreakpoint(ConfiguresBreakpoints $breakpoint, bool $sepia = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set sepia from breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -783,6 +1053,10 @@ class ImageContext
 
     public function sepiaToBreakpoint(ConfiguresBreakpoints $breakpoint, bool $sepia = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set sepia to breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $index = $this->getBreakpoints()
             ->search(function (ConfiguresBreakpoints $bp) use ($breakpoint) {
                 return $bp->value === $breakpoint->value;
@@ -799,6 +1073,10 @@ class ImageContext
 
     public function sepiaBetweenBreakpoints(ConfiguresBreakpoints $startBreakpoint, ConfiguresBreakpoints $endBreakpoint, bool $sepia = true): self
     {
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot set sepia between breakpoints when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
+
         $breakpoints = $this->getBreakpoints();
 
         $startIndex = $breakpoints->search(function (ConfiguresBreakpoints $bp) use ($startBreakpoint) {
@@ -818,15 +1096,27 @@ class ImageContext
         return $this;
     }
 
+    public function getSepia(?ConfiguresBreakpoints $breakpoint = null): ?bool
+    {
+        if (! $this->getUseBreakpoints()) {
+            return $this->sepiaByBreakpoint['default'] ?? null;
+        }
+
+        if (is_null($breakpoint)) {
+            throw new InvalidArgumentException("Breakpoint is required when breakpoints are enabled for ImageContext with key '{$this->key}'.");
+        }
+
+        return $this->sepiaByBreakpoint[$breakpoint->value] ?? null;
+    }
+
     /** @return array<string, bool> */
     public function getSepiaByBreakpoint(): array
     {
-        return $this->sepiaByBreakpoint;
-    }
+        if (! $this->getUseBreakpoints()) {
+            throw new InvalidArgumentException("Cannot get sepia values by breakpoint when breakpoints are disabled for ImageContext with key '{$this->key}'.");
+        }
 
-    public function getSepiaForBreakpoint(ConfiguresBreakpoints $breakpoint): ?bool
-    {
-        return $this->sepiaByBreakpoint[$breakpoint->value] ?? null;
+        return $this->sepiaByBreakpoint;
     }
 
     public function allowsMultiple(bool $allowsMultiple = true): self
@@ -839,6 +1129,18 @@ class ImageContext
     public function getAllowsMultiple(): bool
     {
         return $this->allowsMultiple;
+    }
+
+    public function useBreakpoints(bool $useBreakpoints = true): self
+    {
+        $this->useBreakpoints = $useBreakpoints;
+
+        return $this;
+    }
+
+    public function getUseBreakpoints(): bool
+    {
+        return $this->useBreakpoints ?? ImageLibrary::shouldUseBreakpoints();
     }
 
     public function generateWebP(bool $generateWebP = true): self
@@ -870,14 +1172,23 @@ class ImageContext
         return [
             'key' => $this->key,
             'label' => $this->label,
-            'aspectRatioByBreakpoint' => array_map(
-                fn (AspectRatio $ar) => $ar->toArray(),
-                $this->aspectRatioByBreakpoint
-            ),
-            'blurByBreakpoint' => $this->blurByBreakpoint,
-            'greyscaleByBreakpoint' => $this->greyscaleByBreakpoint,
-            'sepiaByBreakpoint' => $this->sepiaByBreakpoint,
+            'aspectRatio' => $this->getUseBreakpoints()
+                ? array_map(
+                    fn (AspectRatio $ar) => $ar->toArray(),
+                    $this->aspectRatioByBreakpoint
+                )
+                : ($this->aspectRatioByBreakpoint['default'] ?? null)?->toArray(),
+            'blur' => $this->getUseBreakpoints()
+                ? $this->blurByBreakpoint
+                : ($this->blurByBreakpoint['default'] ?? null),
+            'grayscale' => $this->getUseBreakpoints()
+                ? $this->greyscaleByBreakpoint
+                : ($this->greyscaleByBreakpoint['default'] ?? null),
+            'sepia' => $this->getUseBreakpoints()
+                ? $this->sepiaByBreakpoint
+                : ($this->sepiaByBreakpoint['default'] ?? null),
             'allowsMultiple' => $this->allowsMultiple,
+            'useBreakpoints' => $this->useBreakpoints,
             'generateWebP' => $this->generateWebP,
             'generateResponsiveVersions' => $this->generateResponsiveVersions,
         ];

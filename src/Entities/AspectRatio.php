@@ -31,6 +31,11 @@ class AspectRatio
         return (string) $this;
     }
 
+    public function toFloat(): float
+    {
+        return round($this->horizontal / $this->vertical, 2);
+    }
+
     public function toArray(): array
     {
         return [

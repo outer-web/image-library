@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Outerweb\ImageLibrary;
 
+use Outerweb\ImageLibrary\Commands\GenerateCommand;
 use Outerweb\ImageLibrary\Commands\UpgradeCommand;
 use Outerweb\ImageLibrary\Components\Image;
 use Outerweb\ImageLibrary\Components\Scripts;
@@ -19,8 +20,10 @@ class ImageLibraryServiceProvider extends PackageServiceProvider
             ->name('image-library')
             ->hasConfigFile()
             ->hasCommands([
+                GenerateCommand::class,
                 UpgradeCommand::class,
             ])
+            ->hasTranslations()
             ->hasMigrations([
                 'create_source_images_table',
                 'create_images_table',

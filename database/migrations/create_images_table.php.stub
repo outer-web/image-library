@@ -32,6 +32,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['context', 'context_configuration_hash']);
+            $table->index(['context', 'sort_order']);
+            $table->index('created_at');
         });
     }
 
