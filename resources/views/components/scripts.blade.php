@@ -1,102 +1,113 @@
-<script>
-	(() => {
-		const imageSelector = '[data-image-library="image"]';
-		const imageIdDataAttribute = 'data-image-library-id';
-		window.imageLibraryImages = window.imageLibraryImages || [];
+<script {{ $attributes }}>
+(() => {
+    const DEBOUNCE_DELAY = 500;
+    const imageSelector = '[data-image-library="image"]';
 
-		const init = () => {
-			if (window.imageLibraryAbortController) {
-				window.imageLibraryAbortController.abort();
-			}
+    window.imageLibraryImages = window.imageLibraryImages || new Set();
+    window.imageLibraryObserved = window.imageLibraryObserved || new Set();
 
-			window.imageLibraryAbortController = new AbortController();
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    };
 
-			const debounce = (callback, wait) => {
-				let timeout;
-				return (...args) => {
-					const context = this;
-					clearTimeout(timeout);
-					timeout = setTimeout(() => callback.apply(context, args), wait);
-				};
-			};
+    const setSizesAttribute = (image) => {
+        if (!image.isConnected) return;
 
-			const setSizesAttribute = (image, event) => {
-				if (!(width = image.getBoundingClientRect().width)) return;
-				image.sizes = Math.ceil(width / window.innerWidth * 100) + 'vw';
-			};
+        let width = image.getBoundingClientRect().width;
+        const style = getComputedStyle(image);
+        const transform = style.transform;
 
-			window.imageLibraryImages.forEach((image) => {
-				image.addEventListener('load', function() {
-					setSizesAttribute(image);
-				}, {
-					signal: window.imageLibraryAbortController.signal,
-					once: true
-				});
+        if (transform && transform !== 'none') {
+            const match = transform.match(/^matrix\(([^,]+),/);
+            if (match) width *= parseFloat(match[1]);
+        }
 
-				window.addEventListener('resize', function() {
-					debounce(() => setSizesAttribute(
-							image),
-						100);
-				}, {
-					signal: window.imageLibraryAbortController.signal
-				});
+        if (!width) return;
 
-				if (window.imageLibraryIntersectionObserver) {
-					try {
-						window.imageLibraryIntersectionObserver.unobserve(image);
-					} catch (e) {
-						// Image wasn't being observed
-					}
-				}
+        const sizesValue = `${Math.ceil((width / window.innerWidth) * 100)}vw`;
+        image.sizes = sizesValue;
 
-				window.imageLibraryIntersectionObserver = window.imageLibraryIntersectionObserver ||
-					new IntersectionObserver((entries, observer) => {
-						entries.forEach(entry => {
-							if (!entry.isIntersecting) return;
-							setSizesAttribute(entry.target);
-						});
-					}, {
-						signal: window.imageLibraryAbortController.signal,
-					});
+        // Also update all <source> elements inside the same <picture>
+        const picture = image.closest('picture');
+        if (picture) {
+            picture.querySelectorAll('source').forEach(source => {
+                source.sizes = sizesValue;
+            });
+        }
+    };
 
-				window.imageLibraryIntersectionObserver.observe(image);
+    const debouncedUpdate = debounce((image) => setSizesAttribute(image), DEBOUNCE_DELAY);
 
-				setSizesAttribute(image);
-			});
-		};
+    const observeImage = (image) => {
+        if (window.imageLibraryObserved.has(image)) return;
 
-		function checkIfImg(toCheck) {
-			let imagesInNode = toCheck.querySelectorAll(imageSelector);
-			let imagesToAppend = [];
+        window.imageLibraryObserved.add(image);
 
-			for (let image of imagesInNode) {
-				if (!window.imageLibraryImages.find((img) => img.getAttribute(imageIdDataAttribute) === image
-						.getAttribute(
-							imageIdDataAttribute))) {
-					imagesToAppend.push(image);
-				}
-			}
+        if (!image.complete) image.addEventListener('load', () => debouncedUpdate(image), { once: true });
 
-			if (imagesToAppend.length === 0) return;
+        debouncedUpdate(image);
 
-			window.imageLibraryImages = window.imageLibraryImages.concat(imagesToAppend);
+        if (!window.imageLibraryIntersectionObserver) {
+            window.imageLibraryIntersectionObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    debouncedUpdate(entry.target);
+                });
+            });
+        }
 
-			init();
+        window.imageLibraryIntersectionObserver.observe(image);
 
-			setTimeout(() => init(), {{ config('blade_script_init_delay', 300) }});
-		};
+        if ('ResizeObserver' in window) {
+            if (!window.imageLibraryResizeObserver) {
+                window.imageLibraryResizeObserver = new ResizeObserver(entries => {
+                    entries.forEach(entry => debouncedUpdate(entry.target));
+                });
+            }
 
-		var observer = new MutationObserver(function(mutations) {
-			mutations.forEach(mutation => checkIfImg(mutation.target));
-		});
+            window.imageLibraryResizeObserver.observe(image);
+        }
+    };
 
-		observer.observe(document, {
-			childList: true,
-			subtree: true
-		});
+    const initImages = () => {
+        document.querySelectorAll(imageSelector).forEach(image => {
+            if (!window.imageLibraryImages.has(image)) {
+                window.imageLibraryImages.add(image);
+                observeImage(image);
+            }
+        });
+    };
 
-		window.imageLibraryImages = Array.from(document.querySelectorAll(imageSelector));
+    const mutationObserver = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (!(node instanceof Element)) return;
 
-		init();
-	})();
+                if (node.matches(imageSelector) && !window.imageLibraryImages.has(node)) {
+                    window.imageLibraryImages.add(node);
+                    observeImage(node);
+                }
+
+                node.querySelectorAll(imageSelector).forEach(image => {
+                    if (!window.imageLibraryImages.has(image)) {
+                        window.imageLibraryImages.add(image);
+                        observeImage(image);
+                    }
+                });
+            });
+        });
+    });
+
+    mutationObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
+
+    window.addEventListener('resize', debounce(() => {
+        window.imageLibraryImages.forEach(debouncedUpdate);
+    }, DEBOUNCE_DELAY));
+
+    initImages();
+})();
 </script>

@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        if (Schema::hasTable('tmp_images')) {
+            foreach (DB::table('tmp_images')->cursor() as $oldRecord) {
+                $path = "{$oldRecord->uuid}/original.{$oldRecord->file_extension}";
+
+                Storage::disk($oldRecord->disk)->delete($path);
+            }
+
+            Schema::drop('tmp_images');
+        }
+
+        Schema::dropIfExists('image_conversions');
+    }
+
+    public function down()
+    {
+        // Sorry, this migration is not reversible.
+    }
+};
