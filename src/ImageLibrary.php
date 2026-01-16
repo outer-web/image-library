@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Outerweb\ImageLibrary;
 
 use BackedEnum;
+use Illuminate\Container\Attributes\Singleton;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
@@ -15,6 +16,7 @@ use Outerweb\ImageLibrary\Models\SourceImage;
 use Spatie\Image\Enums\CropPosition;
 use Spatie\Image\Image as SpatieImage;
 
+#[Singleton]
 class ImageLibrary
 {
     protected array $imageContexts = [];

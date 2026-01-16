@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 3.0.1 - 2026-01-16
+
+### Fixed
+
+-   Added Singleton attribute to ImageLibrary service which was missing
+
 ## 3.0.0 - 2025-12-22
 
 ### Changed
