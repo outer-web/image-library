@@ -23,7 +23,7 @@
         "nesbot/carbon": "^3.10",
         "outerweb/enum-helpers": "*",
         "outerweb/filament-translatable-fields": "^4.0",
-        "spatie/eloquent-sortable": "^4.5",
+        "spatie/eloquent-sortable": "^5.0",
         "spatie/image": "^3.8",
         "spatie/laravel-package-tools": "^1.16",
         "spatie/laravel-translatable": "^6.11",
