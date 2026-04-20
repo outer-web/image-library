@@ -13,6 +13,42 @@ use Outerweb\ImageLibrary\Jobs\GenerateImageVersionJob;
 use Outerweb\ImageLibrary\Models\Image;
 use Outerweb\ImageLibrary\Models\SourceImage;
 use Outerweb\ImageLibrary\Tests\Fixtures\Models\User;
+use Spatie\Image\Enums\CropPosition;
+
+function createSplitColorUploadedFile(int $width = 500, int $height = 1000): UploadedFile
+{
+    $path = tempnam(sys_get_temp_dir(), 'image-library-test-');
+
+    $image = new Imagick();
+    $image->newImage($width, $height, new ImagickPixel('red'));
+
+    $draw = new ImagickDraw();
+    $draw->setFillColor(new ImagickPixel('blue'));
+    $draw->rectangle(0, (int) floor($height / 2), $width, $height);
+
+    $image->drawImage($draw);
+    $image->setImageFormat('png');
+    $image->writeImage($path);
+    $image->clear();
+    $image->destroy();
+
+    return new UploadedFile($path, 'example-image.png', 'image/png', null, true);
+}
+
+function getCenterPixelColor(string $path): array
+{
+    $image = new Imagick($path);
+
+    $pixel = $image->getImagePixelColor(
+        (int) floor($image->getImageWidth() / 2),
+        (int) floor($image->getImageHeight() / 2)
+    )->getColor();
+
+    $image->clear();
+    $image->destroy();
+
+    return $pixel;
+}
 
 it('is dispatched on the correct connection and queue', function () {
     $user = User::factory()
@@ -233,7 +269,89 @@ it('can apply sepia', function () {
         ->assertExists($image->getRelativePathForBreakpoint($breakpoint));
 });
 
-it('applies default cropping if no crop_data is set', function () {
+it('crops to the context aspect ratio using the default crop position if the context has none', function () {
+    $user = User::factory()
+        ->create();
+
+    Config::set('image-library.defaults.crop_position', CropPosition::Top);
+
+    $file = createSplitColorUploadedFile();
+
+    $sourceImage = SourceImage::upload($file);
+
+    $image = Image::factory()
+        ->forModel($user)
+        ->create([
+            'source_image_id' => $sourceImage->id,
+            'context' => 'context-single',
+            'crop_data' => [],
+        ]);
+
+    $breakpoint = Breakpoint::Small;
+
+    $job = new GenerateImageVersionJob($image->id, $breakpoint);
+
+    $job->handle();
+
+    Storage::disk($image->disk)
+        ->assertExists($image->getRelativePathForBreakpoint($breakpoint));
+
+    $generatedImage = ImageLibrary::getSpatieImage()
+        ->loadFile($image->getAbsolutePathForBreakpoint($breakpoint));
+
+    $pixel = getCenterPixelColor($image->getAbsolutePathForBreakpoint($breakpoint));
+
+    expect($generatedImage->getWidth())->toBe(300)
+        ->and($generatedImage->getHeight())->toBe(300)
+        ->and($pixel['r'])->toBeGreaterThan($pixel['b']);
+});
+
+it('prefers the context crop position over the default crop position if no crop_data is set', function () {
+    $user = User::factory()
+        ->create();
+
+    Config::set('image-library.defaults.crop_position', CropPosition::Top);
+
+    ImageLibrary::registerImageContext(
+        ImageContext::make('bottom-crop-context')
+            ->aspectRatio(AspectRatio::make(1, 1))
+            ->cropPosition(CropPosition::Bottom)
+            ->maxWidth([
+                Breakpoint::Small->value => 300,
+                Breakpoint::Medium->value => 600,
+                Breakpoint::Large->value => 900,
+                Breakpoint::ExtraLarge->value => 1200,
+                Breakpoint::DoubleExtraLarge->value => 1500,
+            ])
+    );
+
+    $file = createSplitColorUploadedFile();
+
+    $sourceImage = SourceImage::upload($file);
+
+    $image = Image::factory()
+        ->forModel($user)
+        ->create([
+            'source_image_id' => $sourceImage->id,
+            'context' => 'bottom-crop-context',
+            'crop_data' => [],
+        ]);
+
+    $breakpoint = Breakpoint::Small;
+
+    $job = new GenerateImageVersionJob($image->id, $breakpoint);
+
+    $job->handle();
+
+    Storage::disk($image->disk)
+        ->assertExists($image->getRelativePathForBreakpoint($breakpoint));
+
+    $pixel = getCenterPixelColor($image->getAbsolutePathForBreakpoint($breakpoint));
+
+    expect($pixel['b'])->toBeGreaterThan($pixel['r']);
+});
+
+it('uses the largest possible crop before resizing when the source already matches the target aspect ratio', function () {
     $user = User::factory()
         ->create();
 
@@ -257,4 +375,10 @@ it('applies default cropping if no crop_data is set', function () {
 
     Storage::disk($image->disk)
         ->assertExists($image->getRelativePathForBreakpoint($breakpoint));
+
+    $generatedImage = ImageLibrary::getSpatieImage()
+        ->loadFile($image->getAbsolutePathForBreakpoint($breakpoint));
+
+    expect($generatedImage->getWidth())->toBe(300)
+        ->and($generatedImage->getHeight())->toBe(300);
 });

@@ -86,27 +86,23 @@ class GenerateImageVersionJob implements ShouldQueue
                 }
             }
         } elseif ($image->context) {
-            $fileWidth = $file->getWidth();
-            $maxWidth = min($image->context->getMaxWidth($this->breakpoint) ?? $fileWidth, $fileWidth);
             $aspectRatio = $image->context->getAspectRatio($this->breakpoint);
-            $cropPosition = $image->context->getCropPosition($this->breakpoint);
 
             if ($aspectRatio) {
-                $maxHeight = $file->getHeight();
-                $possibleWidth = $maxHeight * $aspectRatio->horizontal / $aspectRatio->vertical;
-                $possibleHeight = $maxWidth * $aspectRatio->vertical / $aspectRatio->horizontal;
+                $fileWidth = $file->getWidth();
+                $fileHeight = $file->getHeight();
+                $targetRatio = $aspectRatio->horizontal / $aspectRatio->vertical;
+                $fileRatio = $fileWidth / $fileHeight;
 
-                // @codeCoverageIgnoreStart
-                if ($possibleWidth <= $maxWidth) {
-                    $width = (int) round($possibleWidth);
-                    $height = $maxHeight;
+                if ($fileRatio > $targetRatio) {
+                    $cropWidth = (int) floor($fileHeight * $targetRatio);
+                    $cropHeight = $fileHeight;
                 } else {
-                    $width = $maxWidth;
-                    $height = (int) round($possibleHeight);
+                    $cropWidth = $fileWidth;
+                    $cropHeight = (int) floor($fileWidth / $targetRatio);
                 }
-                // @codeCoverageIgnoreEnd
 
-                $file->crop($width, $height, $cropPosition);
+                $file->crop($cropWidth, $cropHeight, $image->context->getCropPosition($this->breakpoint));
             }
         }
 
