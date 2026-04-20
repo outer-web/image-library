@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\View;
 use Outerweb\ImageLibrary\Components\Image;
 use Outerweb\ImageLibrary\Entities\AspectRatio;
@@ -256,5 +257,33 @@ describe('Image Component', function (): void {
         foreach ($viewData['sources'] as $source) {
             expect($source->media)->toBe('');
         }
+    });
+
+    it('falls back to the source image alt text when the rendered image alt text is blank', function (): void {
+        $user = User::factory()->create();
+        $sourceImage = SourceImage::factory()->create([
+            'alt_text' => [
+                'en' => 'Source image alt text',
+            ],
+        ]);
+
+        $image = ImageModel::factory()
+            ->forModel($user)
+            ->create([
+                'source_image_id' => $sourceImage->getKey(),
+                'context' => 'thumbnail',
+                'alt_text' => [
+                    'en' => '',
+                ],
+            ]);
+
+        $component = new Image($image);
+        $view = $component->render();
+        $html = view($view->getName(), array_merge($view->getData(), [
+            'image' => $image,
+            'attributes' => new ComponentAttributeBag,
+        ]))->render();
+
+        expect($html)->toContain('alt="Source image alt text"');
     });
 });

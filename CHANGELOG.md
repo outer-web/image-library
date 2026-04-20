@@ -2,6 +2,12 @@
 
 All notable changes to `image library` will be documented in this file.
 
+## 3.1.2 - 2026-04-20
+
+### Fixed
+
+-   Fixed image alt_text fallback
+
 ## 3.1.1 - 2026-04-20
 
 ### Fixed

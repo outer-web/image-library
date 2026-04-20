@@ -4,7 +4,7 @@
     
     $attributes = $attributes->merge([
         'src' => $src,
-        'alt' => $image->alt_text ?? $image->sourceImage->alt_text,
+        'alt' => filled($image->alt_text) ? $image->alt_text : $image->sourceImage->alt_text,
         'sizes' => $useBreakpoints ? '1px' : null,
         'data-image-library' => 'image',
         'data-image-library-id' => $image->uuid,
